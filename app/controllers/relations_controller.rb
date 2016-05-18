@@ -18,29 +18,50 @@ class RelationsController < ApplicationController
   def save_relation
   	puts "save_relation"
   	puts params
-  	relations = Relation.where(selector: params[:relation][:selector], selector_version: params[:relation][:selector_version])
+  	relations = Relation.where(selector: params[:relation][:selector], selector_version: params[:relation][:selector_version], url: params[:relation][:url])
   	puts relations.length
   	relation = nil
+    new_relation = false
   	if relations.length == 0
-  		parameters = ActionController::Parameters.new(params[:relation]) # see strong parameters for more details on this
-  		parameters = parameters.permit(:name, :selector, :selector_version, :url)
+      new_relation = true
+  		parameters = ActionController::Parameters.create(params[:relation]) # see strong parameters for more details on this
+  		parameters = parameters.permit(:name, :selector, :selector_version, :url, :num_rows_in_demonstration)
   		urls = Url.where(url: parameters[:url])
   		url = nil
   		if urls.length == 0
   			domain = Domain.find_or_create_by(domain: domain_of_url(parameters[:url]))
-  			url = Url.new({url: parameters[:url], domain: domain})
+  			url = Url.create({url: parameters[:url], domain: domain})
   		else
   			url = urls[0] # again, should only be one
   		end
   		parameters[:url] = url
-  		relation = Relation.new(parameters)
+  		relation = Relation.create(parameters)
   	else
-  		relation = relations[0] # there had better only be one since we have an index enforcing uniqueness on [selector, selector_version]
+  		relation = relations[0] # there had better only be one since we have an index enforcing uniqueness on [selector, selector_version, url]
   	end
   	puts relation
-  	puts "************"
 
   	# ok, now we have the relation with which we should store the columns
-  	
+    columns = params[:columns]
+    columns.each{|column_params|
+      if new_relation or Column.where(xpath: column_params[:xpath], relation_id: relation.id).length == 0
+        # either the relation is new so all columns must be added, or the pre-existing relationship doesn't yet have the col
+        parameters = ActionController::Parameters.new(column_params) # see strong parameters for more details on this
+        parameters = parameters.permit(:name, :xpath, :suffix)
+        parameters[:relation] = relation
+        column = Column.create(parameters)
+      end
+    }
+    # let's make sure we still have the right number of columns recorded in the relation record
+    num_rel_columns = Column.where(relation_id: relation.id).count
+    relation.num_columns = num_rel_columns
+    relation.save
   end
+
+  def retrieve_relation
+    puts "retrieve_relation"
+    puts params
+
+  end
+
 end
