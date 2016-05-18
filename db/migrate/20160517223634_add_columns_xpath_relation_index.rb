@@ -4,6 +4,6 @@ class AddColumnsXpathRelationIndex < ActiveRecord::Migration
     add_column :relations, :num_columns, :integer
     add_column :relations, :num_rows_in_demonstration, :integer
     remove_index :relations, :column => [:selector, :selector_version]
-    add_index :relations, [:selector, :selector_version, :url], :unique => true
+    add_index :relations, [:selector, :selector_version, :url_id], :unique => true
   end
 end

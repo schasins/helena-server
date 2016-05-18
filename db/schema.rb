@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160517223633) do
+ActiveRecord::Schema.define(version: 20160517223634) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -26,6 +26,7 @@ ActiveRecord::Schema.define(version: 20160517223633) do
   end
 
   add_index "columns", ["relation_id"], name: "index_columns_on_relation_id", using: :btree
+  add_index "columns", ["xpath", "relation_id"], name: "index_columns_on_xpath_and_relation_id", unique: true, using: :btree
   add_index "columns", ["xpath"], name: "index_columns_on_xpath", using: :btree
 
   create_table "domains", force: :cascade do |t|
@@ -41,11 +42,13 @@ ActiveRecord::Schema.define(version: 20160517223633) do
     t.string   "selector"
     t.integer  "selector_version"
     t.integer  "url_id"
-    t.datetime "created_at",       null: false
-    t.datetime "updated_at",       null: false
+    t.datetime "created_at",                null: false
+    t.datetime "updated_at",                null: false
+    t.integer  "num_columns"
+    t.integer  "num_rows_in_demonstration"
   end
 
-  add_index "relations", ["selector", "selector_version"], name: "index_relations_on_selector_and_selector_version", unique: true, using: :btree
+  add_index "relations", ["selector", "selector_version", "url_id"], name: "index_relations_on_selector_and_selector_version_and_url_id", unique: true, using: :btree
   add_index "relations", ["url_id"], name: "index_relations_on_url_id", using: :btree
 
   create_table "urls", force: :cascade do |t|

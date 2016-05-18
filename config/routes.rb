@@ -8,6 +8,10 @@ Rails.application.routes.draw do
   root 'welcome#index'
 
   post 'saverelation', :to => 'relations#save_relation', :as => 'saverelation'
+  post 'retrieverelation', :to => 'relations#retrieve_relation', :as => 'retrieverelation'
+
+  resources :relations
+  resources :columns
 
   # Example of regular route:
   #   get 'products/:id' => 'catalog#view'

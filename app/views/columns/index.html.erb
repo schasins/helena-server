@@ -1,0 +1,15 @@
+<table>
+  <tr>
+    <th>Name</th>
+    <th>Xpath</th>
+    <th>Relation</th>
+  </tr>
+ 
+<% @columns.each do |column| %>
+  <tr>
+    <td><%= column.name %></td>
+    <td><%= column.xpath %></td>
+    <td><%= column.relation_id %></td>
+  </tr>
+<% end %>
+</table>
