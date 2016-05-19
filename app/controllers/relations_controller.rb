@@ -29,6 +29,8 @@ class RelationsController < ApplicationController
           # it's a little weird that this would arise, but since it's been tested on a couple members of the domain it's probably reasonable to try this
           relation = relations[0]
         else
+          # what about the root domain?  todo: someday may be better to do root domain also.  not going to worry about it for now, unless we end up repeating across many subdomains
+
           # ok, now we really don't think there's an existing relation in here, better make a new one
           new_relation = true
           parameters = ActionController::Parameters.new(params[:relation]) # see strong parameters for more details on this
@@ -58,10 +60,77 @@ class RelationsController < ApplicationController
     render json: { relation: relation }
   end
 
+  def best_relation(column_list)
+
+    if column_list.length == 0
+      return nil # we don't know any relations :(
+    end
+
+    # first find the relation that has the largest number of our target xpaths
+    relation_ids_to_freq = {}
+    relation_ids_to_relations = {}
+    column_list.each{ |columnObj|
+      rel_id = columnObj.relation_id
+      relation_ids_to_freq[rel_id] = relation_ids_to_freq.fetch(rel_id, 0) + 1
+      relation_ids_to_relations[rel_id] = columnObj.relation
+    }
+    frequent_rel_count = 0
+    frequent_rels = []
+    relation_ids_to_freq.each{ |rel_id, freq|
+      if freq > frequent_rel_count
+        frequent_rel_count = freq
+        frequent_rels = [rel_id]
+      elsif freq == frequent_rel_count
+        frequent_rels.push(rel_id)
+      end
+    }
+    # frequent_rels now stores the relation ids of the relations that have the largest number of our target xpaths
+
+    # of the ones with the most target xpaths, which have the most rows?  and have probably therefore been most carefully trained/crafted...
+    max_rows = 0
+    many_row_relations = []
+    frequent_rels.each{ |rel_id|
+      relation = relation_ids_to_relations[rel_id]
+      relation_num_rows = relation.num_rows_in_demonstration
+      if relation_num_rows > max_rows
+        max_rows = relation_num_rows
+        many_row_relations = [relation]
+      elsif relation_num_rows == max_rows
+        many_row_relations.push(relation)
+      end
+    }
+    # many_row_relations now stores the relation objects with the most rows, of those that have the largest number of our target xpaths
+
+    # of those, which has the most columns?
+    # at this point, we could just resolve ties arbitrarily...  better to do it in an orderly way, so that we're consistent in always building on one, but at this point let's leave it be
+    best_relation = many_row_relations.max_by{|r| r.num_columns}
+
+    return best_relation
+  end
+
   def retrieve_relation
-    puts "retrieve_relation"
-    puts params
-    render json: { placeholder: "p" }
+    # we want to get the best selector (selector with most shared xpaths, then with most rows, then with most columns) for a couple categories:
+    # first for a relation associated with same url (if any) then with one associated with the same domain (if any)
+    # for any xpaths that don't have associated columns in one or more returned relations, try to come up with a name for those
+
+    xpath_strings = params[:xpaths]
+    columns_with_same_xpaths = Column.includes(:relation => :url).where(columns: {xpath: xpath_strings})
+
+    urlObj = Url.find_or_make(params[:url])
+
+    same_url_columns , same_domain_columns = [], []
+    columns_with_same_xpaths.each do |column|
+      same_url_columns << column if column.relation.url == urlObj
+      same_domain_columns << column if column.relation.url.domain == urlObj.domain
+    end
+
+    result = {}
+    result[:same_url_best_relation] = best_relation(same_url_columns)
+    result[:same_domain_best_relation] = best_relation(same_domain_columns)
+
+    puts result
+
+    render json: result
 
   end
 
