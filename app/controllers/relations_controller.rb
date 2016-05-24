@@ -125,7 +125,7 @@ class RelationsController < ApplicationController
     return {selector_version: relation_obj.selector_version, selector: relation_obj.selector, name: relation_obj.name, exclude_first: relation_obj.exclude_first, id: relation_obj.id, columns: column_jsons, num_rows_in_demonstration: relation_obj.num_rows_in_demonstration}
   end
 
-  def retrieve_relation
+  def retrieve_relation_helper(params)
     # we want to get the best selector (selector with most shared xpaths, then with most rows, then with most columns) for a couple categories:
     # first for a relation associated with same url (if any) then with one associated with the same domain (if any)
     # for any xpaths that don't have associated columns in one or more returned relations, try to come up with a name for those
@@ -145,8 +145,19 @@ class RelationsController < ApplicationController
     result[:same_url_best_relation] = relation_representation(best_relation(same_url_columns))
     result[:same_domain_best_relation] = relation_representation(best_relation(same_domain_columns))
 
-    render json: result
+    return result
+  end
 
+  def retrieve_relation
+    render json: retrieve_relation_helper(params)
+  end
+
+  def retrieve_relations
+    result = {pages: []}
+    params[:pages].each do |index, page_relation|
+      result[:pages].push(retrieve_relation_helper(page_relation))
+    end
+    render json: result
   end
 
 end

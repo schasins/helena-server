@@ -9,6 +9,7 @@ Rails.application.routes.draw do
 
   post 'saverelation', :to => 'relations#save_relation', :as => 'saverelation'
   post 'retrieverelation', :to => 'relations#retrieve_relation', :as => 'retrieverelation'
+  post 'retrieverelations', :to => 'relations#retrieve_relations', :as => 'retrieverelations'
 
   resources :relations
   resources :columns
