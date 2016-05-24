@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160517223634) do
+ActiveRecord::Schema.define(version: 20160524000245) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -39,13 +39,14 @@ ActiveRecord::Schema.define(version: 20160517223634) do
 
   create_table "relations", force: :cascade do |t|
     t.string   "name"
-    t.string   "selector"
     t.integer  "selector_version"
     t.integer  "url_id"
     t.datetime "created_at",                null: false
     t.datetime "updated_at",                null: false
     t.integer  "num_columns"
     t.integer  "num_rows_in_demonstration"
+    t.integer  "exclude_first"
+    t.text     "selector"
   end
 
   add_index "relations", ["selector", "selector_version", "url_id"], name: "index_relations_on_selector_and_selector_version_and_url_id", unique: true, using: :btree

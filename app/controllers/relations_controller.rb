@@ -61,7 +61,6 @@ class RelationsController < ApplicationController
   end
 
   def best_relation(column_list)
-
     if column_list.length == 0
       return nil # we don't know any relations :(
     end
@@ -108,6 +107,24 @@ class RelationsController < ApplicationController
     return best_relation
   end
 
+  def column_representation(column_obj)
+    return {xpath: column_obj.xpath, suffix: column_obj.xpath, name: column_obj.name, id: column_obj.id}
+  end
+
+  def relation_representation(relation_obj)
+    if relation_obj == nil
+      return nil
+    end
+
+    columns = Column.where(relation: relation_obj)
+    column_jsons = []
+    columns.each{ |col| 
+      column_jsons.push(column_representation(col)) 
+    }
+
+    return {selector_version: relation_obj.selector_version, selector: relation_obj.selector, name: relation_obj.name, exclude_first: relation_obj.exclude_first, id: relation_obj.id, columns: column_jsons}
+  end
+
   def retrieve_relation
     # we want to get the best selector (selector with most shared xpaths, then with most rows, then with most columns) for a couple categories:
     # first for a relation associated with same url (if any) then with one associated with the same domain (if any)
@@ -125,10 +142,8 @@ class RelationsController < ApplicationController
     end
 
     result = {}
-    result[:same_url_best_relation] = best_relation(same_url_columns)
-    result[:same_domain_best_relation] = best_relation(same_domain_columns)
-
-    puts result
+    result[:same_url_best_relation] = relation_representation(best_relation(same_url_columns))
+    result[:same_domain_best_relation] = relation_representation(best_relation(same_domain_columns))
 
     render json: result
 
