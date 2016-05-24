@@ -122,7 +122,7 @@ class RelationsController < ApplicationController
       column_jsons.push(column_representation(col)) 
     }
 
-    return {selector_version: relation_obj.selector_version, selector: relation_obj.selector, name: relation_obj.name, exclude_first: relation_obj.exclude_first, id: relation_obj.id, columns: column_jsons}
+    return {selector_version: relation_obj.selector_version, selector: relation_obj.selector, name: relation_obj.name, exclude_first: relation_obj.exclude_first, id: relation_obj.id, columns: column_jsons, num_rows_in_demonstration: relation_obj.num_rows_in_demonstration}
   end
 
   def retrieve_relation
