@@ -43,8 +43,6 @@ class RelationsController < ApplicationController
 
   	# ok, now we have the relation with which we should store the columns
     columns = params[:columns]
-    puts "****"
-    puts columns
     columns.each{|i, column_params|
       if new_relation or Column.where(xpath: column_params[:xpath], relation: relation).length == 0
         # either the relation is new so all columns must be added, or the pre-existing relationship doesn't yet have the col
@@ -123,6 +121,8 @@ class RelationsController < ApplicationController
     columns.each{ |col| 
       column_jsons.push(column_representation(col)) 
     }
+    
+    puts relation_obj.name
 
     return {selector_version: relation_obj.selector_version, selector: relation_obj.selector, name: relation_obj.name, exclude_first: relation_obj.exclude_first, id: relation_obj.id, columns: column_jsons, num_rows_in_demonstration: relation_obj.num_rows_in_demonstration}
   end
