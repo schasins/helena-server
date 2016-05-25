@@ -108,7 +108,7 @@ class RelationsController < ApplicationController
   end
 
   def column_representation(column_obj)
-    return {xpath: column_obj.xpath, suffix: column_obj.xpath, name: column_obj.name, id: column_obj.id}
+    return {xpath: column_obj.xpath, suffix: column_obj.suffix, name: column_obj.name, id: column_obj.id}
   end
 
   def relation_representation(relation_obj)
@@ -121,7 +121,7 @@ class RelationsController < ApplicationController
     columns.each{ |col| 
       column_jsons.push(column_representation(col)) 
     }
-    
+
     puts relation_obj.name
 
     return {selector_version: relation_obj.selector_version, selector: relation_obj.selector, name: relation_obj.name, exclude_first: relation_obj.exclude_first, id: relation_obj.id, columns: column_jsons, num_rows_in_demonstration: relation_obj.num_rows_in_demonstration}
