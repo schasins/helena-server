@@ -116,13 +116,11 @@ class RelationsController < ApplicationController
       return nil
     end
 
-    columns = Column.where(relation: relation_obj)
+    columns = relation_obj.columns
     column_jsons = []
     columns.each{ |col| 
       column_jsons.push(column_representation(col)) 
     }
-
-    puts relation_obj.name
 
     return {selector_version: relation_obj.selector_version, selector: relation_obj.selector, name: relation_obj.name, exclude_first: relation_obj.exclude_first, id: relation_obj.id, columns: column_jsons, num_rows_in_demonstration: relation_obj.num_rows_in_demonstration}
   end
@@ -160,6 +158,18 @@ class RelationsController < ApplicationController
       result[:pages].push({url: page_relation[:url], relations: retrieve_relation_helper(page_relation)})
     end
     render json: result
+  end
+
+  def all_page_relations
+    url = params[:url]
+    urlObj = Url.find_or_make(url)
+    # let's find all the relations associated with this domain
+    relations = Relation.includes(:columns).joins(:url).where(urls: { domain_id: urlObj.domain_id })
+    relation_objects = []
+    relations.each do |relation|
+      relation_objects.push(relation_representation(relation))
+    end
+    render json: {relations: relation_objects}
   end
 
 end

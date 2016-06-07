@@ -2,3 +2,5 @@ $($.post('http://localhost:3000/saverelation', { relation: {name: "test", url: "
 
 $($.post('http://localhost:3000/retrieverelation', { xpaths: ["a[1]/div[2]"], url: "www.test2.com/test-test" }, function(resp){ console.log(resp);} ));
 $($.post('http://localhost:3000/retrieverelations', { pages: [{xpaths: ["a[1]/div[2]"], url: "www.test2.com/test-test"}] }, function(resp){ console.log(resp);} ));
+
+$($.post('http://localhost:3000/allpagerelations', { url: "www.test2.com" }, function(resp){ console.log(resp);} ));
