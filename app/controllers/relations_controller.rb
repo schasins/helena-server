@@ -55,8 +55,17 @@ class RelationsController < ApplicationController
     # let's make sure we still have the right number of columns recorded in the relation record
     num_rel_columns = Column.where(relation_id: relation.id).count
     relation.num_columns = num_rel_columns
-    relation.save
 
+    # although the selector and selector_version are guaranteed to be the same, based on how we grabbed our relation out of the database, the next button selector may have changed
+    relation.next_type = params[:relation][:next_type]
+    relation.next_button_selector = params[:relation][:next_button_selector]
+
+    # if this version of the selector was actually demonstrated on more rows, we should probably go ahead and trust it more...
+    if params[:relation][:num_rows_in_demonstration].to_i > relation.num_rows_in_demonstration
+      relation.num_rows_in_demonstration = params[:relation][:num_rows_in_demonstration].to_i
+    end
+
+    relation.save
     render json: { relation: relation }
   end
 
@@ -122,7 +131,7 @@ class RelationsController < ApplicationController
       column_jsons.push(column_representation(col)) 
     }
 
-    return {selector_version: relation_obj.selector_version, selector: relation_obj.selector, name: relation_obj.name, exclude_first: relation_obj.exclude_first, id: relation_obj.id, columns: column_jsons, num_rows_in_demonstration: relation_obj.num_rows_in_demonstration}
+    return {selector_version: relation_obj.selector_version, selector: relation_obj.selector, name: relation_obj.name, exclude_first: relation_obj.exclude_first, id: relation_obj.id, columns: column_jsons, num_rows_in_demonstration: relation_obj.num_rows_in_demonstration, next_type: relation_obj.next_type, next_button_selector: relation_obj.next_button_selector}
   end
 
   def retrieve_relation_helper(params)
