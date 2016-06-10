@@ -45,12 +45,17 @@ class RelationsController < ApplicationController
   	# ok, now we have the relation with which we should store the columns
     columns = params[:relation][:columns]
     columns.each{|i, column_params|
+      parameters = ActionController::Parameters.new(column_params) # see strong parameters for more details on this
+      parameters = parameters.permit(:name, :xpath, :suffix)
       if new_relation or Column.where(xpath: column_params[:xpath], relation: relation).length == 0
         # either the relation is new so all columns must be added, or the pre-existing relationship doesn't yet have the col
-        parameters = ActionController::Parameters.new(column_params) # see strong parameters for more details on this
-        parameters = parameters.permit(:name, :xpath, :suffix)
         parameters[:relation] = relation
         column = Column.create(parameters)
+      else
+        # allowed to rename columns
+        column = Column.where(xpath: column_params[:xpath], relation: relation)
+        column.name = parameters[:name]
+        column.save
       end
     }
     # let's make sure we still have the right number of columns recorded in the relation record
@@ -60,6 +65,7 @@ class RelationsController < ApplicationController
     # although the selector and selector_version are guaranteed to be the same, based on how we grabbed our relation out of the database, the next button selector may have changed
     relation.next_type = params[:relation][:next_type]
     relation.next_button_selector = params[:relation][:next_button_selector]
+    relation.name = params[:relation][:name]
 
     # if this version of the selector was actually demonstrated on more rows, we should probably go ahead and trust it more...
     if params[:relation][:num_rows_in_demonstration].to_i > relation.num_rows_in_demonstration
