@@ -53,7 +53,7 @@ class RelationsController < ApplicationController
         column = Column.create(parameters)
       else
         # allowed to rename columns
-        column = Column.where(xpath: column_params[:xpath], relation: relation)
+        column = Column.where(xpath: column_params[:xpath], relation: relation)[0] # there should only be one of these!  if not, something is very weird
         column.name = parameters[:name]
         column.save
       end
