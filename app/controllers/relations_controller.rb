@@ -34,7 +34,7 @@ class RelationsController < ApplicationController
           # ok, now we really don't think there's an existing relation in here, better make a new one
           new_relation = true
           parameters = ActionController::Parameters.new(params[:relation]) # see strong parameters for more details on this
-          parameters = parameters.permit(:name, :selector, :selector_version, :url, :num_rows_in_demonstration)
+          parameters = parameters.permit(:name, :selector, :selector_version, :url, :num_rows_in_demonstration, :exclude_first, :next_type, :next_button_selector)
           parameters[:url] = urlObj
           relation = Relation.create(parameters)
         end
