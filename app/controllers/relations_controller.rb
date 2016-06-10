@@ -36,6 +36,7 @@ class RelationsController < ApplicationController
           parameters = ActionController::Parameters.new(params[:relation]) # see strong parameters for more details on this
           parameters = parameters.permit(:name, :selector, :selector_version, :url, :num_rows_in_demonstration, :exclude_first, :next_type, :next_button_selector)
           parameters[:url] = urlObj
+          puts parameters
           relation = Relation.create(parameters)
         end
     	end
