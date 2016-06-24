@@ -12,6 +12,10 @@ Rails.application.routes.draw do
   post 'retrieverelations', :to => 'relations#retrieve_relations', :as => 'retrieverelations'
   post 'allpagerelations', :to => 'relations#all_page_relations', :as => 'allpagerelations'
 
+  post 'newdatasetsid', :to => 'datasets#new', :as => 'newdatasetsid'
+  post 'datasetslice', :to => 'datasets#save_slice', :as => 'datasetslice'
+  get 'datasets/:id' => 'datasets#download'
+
   resources :relations
   resources :columns
 

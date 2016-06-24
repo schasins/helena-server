@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160524000246) do
+ActiveRecord::Schema.define(version: 20160624213626) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -28,6 +28,30 @@ ActiveRecord::Schema.define(version: 20160524000246) do
   add_index "columns", ["relation_id"], name: "index_columns_on_relation_id", using: :btree
   add_index "columns", ["xpath", "relation_id"], name: "index_columns_on_xpath_and_relation_id", unique: true, using: :btree
   add_index "columns", ["xpath"], name: "index_columns_on_xpath", using: :btree
+
+  create_table "dataset_cells", force: :cascade do |t|
+    t.integer  "dataset_id"
+    t.integer  "row"
+    t.integer  "col"
+    t.integer  "dataset_value_id"
+    t.datetime "created_at",       null: false
+    t.datetime "updated_at",       null: false
+  end
+
+  add_index "dataset_cells", ["dataset_id"], name: "index_dataset_cells_on_dataset_id", using: :btree
+  add_index "dataset_cells", ["dataset_value_id"], name: "index_dataset_cells_on_dataset_value_id", using: :btree
+
+  create_table "dataset_values", force: :cascade do |t|
+    t.text     "text"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "datasets", force: :cascade do |t|
+    t.string   "name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
 
   create_table "domains", force: :cascade do |t|
     t.text     "domain"
@@ -65,6 +89,8 @@ ActiveRecord::Schema.define(version: 20160524000246) do
   add_index "urls", ["url"], name: "index_urls_on_url", unique: true, using: :btree
 
   add_foreign_key "columns", "relations"
+  add_foreign_key "dataset_cells", "dataset_values"
+  add_foreign_key "dataset_cells", "datasets"
   add_foreign_key "relations", "urls"
   add_foreign_key "urls", "domains"
 end

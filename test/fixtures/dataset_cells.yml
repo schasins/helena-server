@@ -1,0 +1,13 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  dataset_id: 
+  row: 1
+  col: 1
+  dataset_value_id: 
+
+two:
+  dataset_id: 
+  row: 1
+  col: 1
+  dataset_value_id: 
