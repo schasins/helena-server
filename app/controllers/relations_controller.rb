@@ -171,7 +171,7 @@ class RelationsController < ApplicationController
   def retrieve_relations
     result = {pages: []}
     params[:pages].each do |index, page_relation|
-      result[:pages].push({url: page_relation[:url], relations: retrieve_relation_helper(page_relation)})
+      result[:pages].push({url: page_relation[:url], page_var_name: page_relation[:page_var_name], relations: retrieve_relation_helper(page_relation)})
     end
     render json: result
   end
