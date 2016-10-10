@@ -11,3 +11,6 @@
 /log/*
 !/log/.keep
 /tmp
+
+# don't put the database stuff in there
+config/database.yml
