@@ -33,7 +33,7 @@ class DatasetsController < ApplicationController
   def download
   	dataset = Dataset.find(params[:id])
   	filename = dataset.name
-  	if (filename == nil or filename = "")
+  	if (filename == nil or filename == "")
   		filename = "dataset"
   	end
 
@@ -44,6 +44,37 @@ class DatasetsController < ApplicationController
   		if (cell.row != currentRowIndex)
   			currentRowIndex = cell.row
   			rows.push([])
+  		end
+  		rows[currentRowIndex].push(cell.dataset_value.text)
+  	}
+
+  	@rows = rows
+
+    response.headers['Content-Type'] = 'text/csv'
+    response.headers['Content-Disposition'] = 'attachment; filename=' + filename + '.csv'    
+    render :template => "datasets/download.csv.erb"
+
+  end
+
+  def downloadforgiving
+  	dataset = Dataset.find(params[:id])
+  	filename = dataset.name
+  	if (filename == nil or filename == "")
+  		filename = "dataset"
+  	end
+
+  	cells = DatasetCell.includes(:dataset_value).where({dataset_id: params[:id]}).order(row: :asc, col: :asc)
+  	rows = []
+  	currentRowIndex = -1
+        currentDatasetRowIndex = -1
+  	cells.each{ |cell|
+  		if (cell.row != currentDatasetRowIndex)
+                        if (!cell.row)
+                          next
+                        end
+  			currentRowIndex += 1
+                        currentDatasetRowIndex = cell.row
+                        rows.push([])
   		end
   		rows[currentRowIndex].push(cell.dataset_value.text)
   	}

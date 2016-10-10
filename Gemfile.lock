@@ -75,6 +75,9 @@ GEM
     multi_json (1.12.0)
     nokogiri (1.6.7.2)
       mini_portile2 (~> 2.0.0.rc2)
+    passenger (5.0.30)
+      rack
+      rake (>= 0.8.1)
     pg (0.18.4)
     rack (1.6.4)
     rack-test (0.6.3)
@@ -152,6 +155,7 @@ DEPENDENCIES
   coffee-rails (~> 4.1.0)
   jbuilder (~> 2.0)
   jquery-rails
+  passenger (>= 5.0.25)
   pg (~> 0.15)
   rails (= 4.2.6)
   rails_12factor
@@ -163,4 +167,4 @@ DEPENDENCIES
   web-console (~> 2.0)
 
 BUNDLED WITH
-   1.12.4
+   1.12.5

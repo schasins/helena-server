@@ -15,6 +15,7 @@ Rails.application.routes.draw do
   post 'newdatasetsid', :to => 'datasets#new', :as => 'newdatasetsid'
   post 'datasetslice', :to => 'datasets#save_slice', :as => 'datasetslice'
   get 'datasets/:id' => 'datasets#download'
+  get 'datasetsforgiving/:id' => 'datasets#downloadforgiving'
 
   resources :relations
   resources :columns
