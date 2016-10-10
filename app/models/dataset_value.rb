@@ -12,4 +12,13 @@ class DatasetValue < ActiveRecord::Base
 		return valueObj
   end
 
+  def self.add_text_hashes_to_rows_that_lack_them()
+  	DatasetValue.find_each do |value|
+	  if value[:text_hash].nil?
+	  	value[:text_hash] = Digest::SHA1.hexdigest(value[:text])
+	  	value.save()
+	  end
+	end
+  end
+
 end
