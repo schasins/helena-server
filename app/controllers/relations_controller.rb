@@ -116,6 +116,12 @@ class RelationsController < ApplicationController
     }
     # many_row_relations now stores the relation objects with the most rows, of those that have the largest number of our target xpaths
 
+    # if we have some options that actually include next button types, let's stick with just considering those.  else, just try with everything
+    next_type_present_relations = many_row_relations.select(|relation| relation.next_type.present?})
+    if (next_type_present_relations.length > 0)
+      many_row_relations = next_type_present_relations
+    end
+
     # of those, which has the most columns?
     # at this point, we could just resolve ties arbitrarily...  better to do it in an orderly way, so that we're consistent in always building on one, but at this point let's leave it be
     best_relation = many_row_relations.max_by{|r| r.num_columns}
