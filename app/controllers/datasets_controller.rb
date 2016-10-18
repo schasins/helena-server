@@ -17,9 +17,11 @@ class DatasetsController < ApplicationController
   	# using transactions for bulk insertion
   	# still won't be super fast, but should be sufficient for now.  todo: make it even better~
   	ActiveRecord::Base.transaction do
-	  	params[:values].each{ |value_text, positionList|
-	  		valueObject = DatasetValue.find_or_make(value_text)
-	  		positionList.each{ |i, coords|
+                vals = JSON.parse(URI.decode(params[:values]))
+	  	vals.each{ |value_text, positionList|
+	  		#puts positionList
+                        valueObject = DatasetValue.find_or_make(value_text)
+	  		positionList.each{ |coords|
 	  			parameters = {dataset_id: dataset_id, dataset_value_id: valueObject.id, row: coords[0], col: coords[1]}
 	  			DatasetCell.create(parameters)
 	  		}
