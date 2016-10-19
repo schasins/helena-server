@@ -101,11 +101,18 @@ class RelationsController < ApplicationController
     }
     # frequent_rels now stores the relation ids of the relations that have the largest number of our target xpaths
 
+    frequent_relations = frequent_rels.map { |rel_id| relation_ids_to_relations[rel_id] }
+
+    # if we have some options that actually include next button types, let's stick with just considering those.  else, just try with everything
+    next_type_present_relations = frequent_relations.select {|relation| relation.next_type.present?}
+    if (next_type_present_relations.length > 0)
+      frequent_relations = next_type_present_relations
+    end
+
     # of the ones with the most target xpaths, which have the most rows?  and have probably therefore been most carefully trained/crafted...
     max_rows = 0
     many_row_relations = []
-    frequent_rels.each{ |rel_id|
-      relation = relation_ids_to_relations[rel_id]
+    frequent_relations.each{ |relation|
       relation_num_rows = relation.num_rows_in_demonstration
       if relation_num_rows > max_rows
         max_rows = relation_num_rows
@@ -115,12 +122,6 @@ class RelationsController < ApplicationController
       end
     }
     # many_row_relations now stores the relation objects with the most rows, of those that have the largest number of our target xpaths
-
-    # if we have some options that actually include next button types, let's stick with just considering those.  else, just try with everything
-    next_type_present_relations = many_row_relations.select(|relation| relation.next_type.present?})
-    if (next_type_present_relations.length > 0)
-      many_row_relations = next_type_present_relations
-    end
 
     # of those, which has the most columns?
     # at this point, we could just resolve ties arbitrarily...  better to do it in an orderly way, so that we're consistent in always building on one, but at this point let's leave it be
