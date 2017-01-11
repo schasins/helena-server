@@ -99,12 +99,25 @@ class RelationsController < ApplicationController
         frequent_rels.push(rel_id)
       end
     }
+
+    puts "**** frequent_rels"
+    puts frequent_rels.to_yaml
+    puts "****"
+
     # frequent_rels now stores the relation ids of the relations that have the largest number of our target xpaths
 
     frequent_relations = frequent_rels.map { |rel_id| relation_ids_to_relations[rel_id] }
 
+
+    puts "**** frequent_relations"
+    puts frequent_relations.to_yaml
+    puts "****"
+
     # if we have some options that actually include next button types, let's stick with just considering those.  else, just try with everything
     next_type_present_relations = frequent_relations.select {|relation| relation.next_type.present?}
+    puts next_type_present_relations
+    puts "^^^^^"
+    puts next_type_present_relations.length
     if (next_type_present_relations.length > 0)
       frequent_relations = next_type_present_relations
     end

@@ -1,19 +1,23 @@
 <table>
   <tr>
+    <th>Id</th>
     <th>Name</th>
     <th>Selector</th>
     <th>Url</th>
     <th>Num Columns</th>
     <th>Num Rows</th>
+    <th>Next Type</th>
   </tr>
  
 <% @relations.each do |relation| %>
   <tr>
+    <td><%= relation.id %></td>
     <td><%= relation.name %></td>
     <td><%= relation.selector %></td>
     <td><%= relation.url.url %></td>
     <td><%= relation.num_columns %></td>
     <td><%= relation.num_rows_in_demonstration %></td>
+    <td><%= relation.next_type %></td>
   </tr>
 <% end %>
 </table>
