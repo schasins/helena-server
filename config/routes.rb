@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  resources :program_uses_relations
+  resources :programs
   get 'welcome/index'
 
   # The priority is based upon order of creation: first created -> highest priority.
@@ -16,6 +18,8 @@ Rails.application.routes.draw do
   post 'datasetslice', :to => 'datasets#save_slice', :as => 'datasetslice'
   get 'datasets/:id' => 'datasets#download'
   get 'datasetsforgiving/:id' => 'datasets#downloadforgiving'
+
+  post 'saveprogram', :to => 'programs#save_program', :as => 'saveprogram'
 
   resources :relations
   resources :columns

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160625000247) do
+ActiveRecord::Schema.define(version: 20170112171836) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -64,6 +64,23 @@ ActiveRecord::Schema.define(version: 20160625000247) do
 
   add_index "domains", ["domain"], name: "index_domains_on_domain", unique: true, using: :btree
 
+  create_table "program_uses_relations", force: :cascade do |t|
+    t.integer  "program_id"
+    t.integer  "relation_id"
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
+  end
+
+  add_index "program_uses_relations", ["program_id"], name: "index_program_uses_relations_on_program_id", using: :btree
+  add_index "program_uses_relations", ["relation_id"], name: "index_program_uses_relations_on_relation_id", using: :btree
+
+  create_table "programs", force: :cascade do |t|
+    t.string   "name"
+    t.text     "serialized_program"
+    t.datetime "created_at",         null: false
+    t.datetime "updated_at",         null: false
+  end
+
   create_table "relations", force: :cascade do |t|
     t.string   "name"
     t.integer  "selector_version"
@@ -94,6 +111,8 @@ ActiveRecord::Schema.define(version: 20160625000247) do
   add_foreign_key "columns", "relations"
   add_foreign_key "dataset_cells", "dataset_values"
   add_foreign_key "dataset_cells", "datasets"
+  add_foreign_key "program_uses_relations", "programs"
+  add_foreign_key "program_uses_relations", "relations"
   add_foreign_key "relations", "urls"
   add_foreign_key "urls", "domains"
 end
