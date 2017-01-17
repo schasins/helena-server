@@ -7,7 +7,6 @@ class ProgramsController < ApplicationController
 
   def index
     @programs = Program.all
-    render :template => "programs/index.json.erb"
   end
 
   def save_program
