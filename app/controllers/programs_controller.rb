@@ -2,11 +2,13 @@ class ProgramsController < ApplicationController
   skip_before_action :protect_from_forgery, :only =>[:save_program] # save_relation is going to be coming from the Chrome extension, so can't get the CSRF token.  in future should consider whether we should require some kind of authentication for this
   protect_from_forgery with: :null_session, :only =>[:save_program]
 
-
-  before_action :set_program, only: [:show, :edit, :update, :destroy]
-
   def index
     @programs = Program.all
+  end
+
+  def show
+    program = Program.find(params[:id])
+    render json: {program: program}
   end
 
   def save_program
