@@ -68,15 +68,16 @@ class DatasetsController < ApplicationController
   	cells = DatasetCell.includes(:dataset_value).where({dataset_id: params[:id]}).order(row: :asc, col: :asc)
   	rows = []
   	currentRowIndex = -1
-        currentDatasetRowIndex = -1
+    currentDatasetRowIndex = -1
   	cells.each{ |cell|
   		if (cell.row != currentDatasetRowIndex)
-                        if (!cell.row)
-                          next
-                        end
+        if (!cell.row)
+          puts cell
+          next
+        end
   			currentRowIndex += 1
-                        currentDatasetRowIndex = cell.row
-                        rows.push([])
+        currentDatasetRowIndex = cell.row
+        rows.push([])
   		end
   		rows[currentRowIndex].push(cell.dataset_value.text)
   	}
