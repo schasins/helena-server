@@ -72,7 +72,7 @@ class DatasetsController < ApplicationController
   	cells.each{ |cell|
   		if (cell.row != currentDatasetRowIndex)
         if (!cell.row)
-          puts cell
+          puts "bad cell:", cell
           next
         end
   			currentRowIndex += 1
