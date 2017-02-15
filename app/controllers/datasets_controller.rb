@@ -26,8 +26,8 @@ class DatasetsController < ApplicationController
       positionLists = JSON.parse(params[:position_lists])
 	  	nodes.each{ |index, node|
 	  		#puts positionList
-        text = node.value_text
-        link = node.value_link
+        text = node.text
+        link = node.link
         scraped_attribute = node.scraped_attribute
         source_url = node.source_url
         top_frame_source_url = node.top_frame_source_url
