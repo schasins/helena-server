@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170112171836) do
+ActiveRecord::Schema.define(version: 20170112171838) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -34,12 +34,27 @@ ActiveRecord::Schema.define(version: 20170112171836) do
     t.integer  "row"
     t.integer  "col"
     t.integer  "dataset_value_id"
-    t.datetime "created_at",       null: false
-    t.datetime "updated_at",       null: false
+    t.datetime "created_at",              null: false
+    t.datetime "updated_at",              null: false
+    t.integer  "scraped_attribute"
+    t.integer  "source_url_id"
+    t.integer  "top_frame_source_url_id"
+    t.integer  "dataset_link_id"
   end
 
   add_index "dataset_cells", ["dataset_id"], name: "index_dataset_cells_on_dataset_id", using: :btree
+  add_index "dataset_cells", ["dataset_link_id"], name: "index_dataset_cells_on_dataset_link_id", using: :btree
   add_index "dataset_cells", ["dataset_value_id"], name: "index_dataset_cells_on_dataset_value_id", using: :btree
+  add_index "dataset_cells", ["source_url_id"], name: "index_dataset_cells_on_source_url_id", using: :btree
+  add_index "dataset_cells", ["top_frame_source_url_id"], name: "index_dataset_cells_on_top_frame_source_url_id", using: :btree
+
+  create_table "dataset_links", force: :cascade do |t|
+    t.text     "link"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_index "dataset_links", ["link"], name: "index_dataset_links_on_link", unique: true, using: :btree
 
   create_table "dataset_values", force: :cascade do |t|
     t.text     "text"
@@ -109,8 +124,11 @@ ActiveRecord::Schema.define(version: 20170112171836) do
   add_index "urls", ["url"], name: "index_urls_on_url", unique: true, using: :btree
 
   add_foreign_key "columns", "relations"
+  add_foreign_key "dataset_cells", "dataset_links"
   add_foreign_key "dataset_cells", "dataset_values"
   add_foreign_key "dataset_cells", "datasets"
+  add_foreign_key "dataset_cells", "urls", column: "source_url_id"
+  add_foreign_key "dataset_cells", "urls", column: "top_frame_source_url_id"
   add_foreign_key "program_uses_relations", "programs"
   add_foreign_key "program_uses_relations", "relations"
   add_foreign_key "relations", "urls"

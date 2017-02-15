@@ -24,13 +24,14 @@ class DatasetsController < ApplicationController
   	ActiveRecord::Base.transaction do
       nodes = JSON.parse(URI.decode(params[:nodes]))
       positionLists = JSON.parse(params[:position_lists])
-	  	nodes.each{ |index, node|
-	  		#puts positionList
-        text = node.text
-        link = node.link
-        scraped_attribute = node.scraped_attribute
-        source_url = node.source_url
-        top_frame_source_url = node.top_frame_source_url
+      index = -1
+	  	nodes.each{ |node|
+        index += 1
+        text = node["text"]
+        link = node["link"]
+        scraped_attribute = node["scraped_attribute"]
+        source_url = node["source_url"]
+        top_frame_source_url = node["top_frame_source_url"]
 
         text_object = DatasetValue.find_or_make(text)
         link_object = DatasetLink.find_or_make(link)
@@ -45,8 +46,8 @@ class DatasetsController < ApplicationController
             dataset_value_id: text_object.id, 
             dataset_link_id: link_object.id, 
             scraped_attribute: scraped_attribute_num, 
-            source_url: source_url_object.id,
-            top_frame_source_url: top_frame_source_url_object.id,
+            source_url_id: source_url_object.id,
+            top_frame_source_url_id: top_frame_source_url_object.id,
             row: coords[0], 
             col: coords[1]}
 	  			DatasetCell.create(parameters)
@@ -65,7 +66,7 @@ class DatasetsController < ApplicationController
   		filename = "dataset"
   	end
 
-  	cells = DatasetCell.includes(:dataset_value, :dataset_link, :scraped_attribute).where({dataset_id: params[:id]}).order(row: :asc, col: :asc)
+  	cells = DatasetCell.includes(:dataset_value, :dataset_link).where({dataset_id: params[:id]}).order(row: :asc, col: :asc)
   	rows = []
   	currentRowIndex = -1;
   	cells.each{ |cell|
