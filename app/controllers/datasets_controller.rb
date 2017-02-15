@@ -35,9 +35,9 @@ class DatasetsController < ApplicationController
         text_object = DatasetValue.find_or_make(text)
         link_object = DatasetLink.find_or_make(link)
         scraped_attribute_num = Scraped::TEXT # default to scraping text
-        if (scraped_attribute == "LINK"){
+        if (scraped_attribute == "LINK")
           scraped_attribute_num = Scraped::LINK
-        }
+        end
         source_url_object = Url.find_or_make(source_url)
         top_frame_source_url_object = Url.find_or_make(top_frame_source_url)
 	  		positionLists[index].each{ |coords|
