@@ -5,7 +5,13 @@ class DatasetValue < ActiveRecord::Base
 		values = DatasetValue.where({text_hash: text_hash, text: text})
 		valueObj = nil
 		if values.length == 0
-			valueObj = DatasetValue.create({text: text, text_hash: text_hash})
+	          begin
+				valueObj = DatasetValue.create({text: text, text_hash: text_hash})
+	          rescue ActiveRecord::RecordNotUnique
+	            # sometimes multiple different requests are trying to do this at the same time and another will succeed first
+	            # so let's actually grab the existing one out of the db
+	            return self.find_or_make(text)
+	          end
 		else
 			valueObj = values[0] # should only be one, because enforce uniqueness
 		end
