@@ -1,7 +1,12 @@
 class DatasetValue < ActiveRecord::Base
 
   def self.find_or_make(text)
-  		text_hash = Digest::SHA1.hexdigest(text)
+  		text_hash = nil
+  		if (text.nil?)
+  			text_hash = nil
+  		else
+  			text_hash = Digest::SHA1.hexdigest(text)
+  		end
 		values = DatasetValue.where({text_hash: text_hash, text: text})
 		valueObj = nil
 		if values.length == 0
