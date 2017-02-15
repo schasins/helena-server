@@ -99,7 +99,7 @@ class DatasetsController < ApplicationController
   		filename = "dataset"
   	end
 
-  	cells = DatasetCell.includes(:dataset_value, :dataset_link, :scraped_attribute).where({dataset_id: params[:id]}).order(row: :asc, col: :asc)
+  	cells = DatasetCell.includes(:dataset_value, :dataset_link).where({dataset_id: params[:id]}).order(row: :asc, col: :asc)
   	rows = []
   	currentRowIndex = -1
     currentDatasetRowIndex = -1
