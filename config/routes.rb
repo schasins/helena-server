@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  resources :transaction_cells
+  resources :transactions
   resources :program_uses_relations
   resources :programs
   get 'welcome/index'
