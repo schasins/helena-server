@@ -1,8 +1,4 @@
 Rails.application.routes.draw do
-  resources :transaction_cells
-  resources :transactions
-  resources :program_uses_relations
-  resources :programs
   get 'welcome/index'
 
   # The priority is based upon order of creation: first created -> highest priority.
@@ -22,6 +18,9 @@ Rails.application.routes.draw do
   get 'datasetsforgiving/:id' => 'datasets#downloadforgiving'
 
   post 'saveprogram', :to => 'programs#save_program', :as => 'saveprogram'
+
+  post 'newtransaction', :to => 'transactions#new', :as => 'newtransaction'
+  post 'transactionexists', :to => 'transactions#exists', :as => 'transactionexists'
 
   resources :relations
   resources :columns

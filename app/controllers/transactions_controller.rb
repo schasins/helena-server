@@ -1,74 +1,66 @@
 class TransactionsController < ApplicationController
-  before_action :set_transaction, only: [:show, :edit, :update, :destroy]
 
-  # GET /transactions
-  # GET /transactions.json
-  def index
-    @transactions = Transaction.all
-  end
-
-  # GET /transactions/1
-  # GET /transactions/1.json
-  def show
-  end
-
-  # GET /transactions/new
   def new
-    @transaction = Transaction.new
-  end
+    dataset_id = params[:id]
+    parameters = {dataset_id: dataset_id}
+    transaction = Transaction.create(parameters)
 
-  # GET /transactions/1/edit
-  def edit
-  end
-
-  # POST /transactions
-  # POST /transactions.json
-  def create
-    @transaction = Transaction.new(transaction_params)
-
-    respond_to do |format|
-      if @transaction.save
-        format.html { redirect_to @transaction, notice: 'Transaction was successfully created.' }
-        format.json { render :show, status: :created, location: @transaction }
+    transaction_items = JSON.parse(URI.decode(params[:transaction]))
+    index = -1
+    transaction_items.each{ |item|
+      index += 1
+      attri = item["attr"]
+      val = item["val"]
+      if (attri == "TEXT")
+        val_id = DatasetValue.find_or_make(val)
+      elsif (attri == "LINK")
+        val_id = DatasetLink.find_or_make(val)
       else
-        format.html { render :new }
-        format.json { render json: @transaction.errors, status: :unprocessable_entity }
+        puts "Uh oh, don't know the attribute type for a transaction cell."
       end
+      params = {transaction_id: transaction.id,
+                index: index,
+                attr_value: val}
+      TransactionCell.create(params)
     end
+    render json: { transaction_id: transaction.id }
   end
 
-  # PATCH/PUT /transactions/1
-  # PATCH/PUT /transactions/1.json
-  def update
-    respond_to do |format|
-      if @transaction.update(transaction_params)
-        format.html { redirect_to @transaction, notice: 'Transaction was successfully updated.' }
-        format.json { render :show, status: :ok, location: @transaction }
+  def exists
+    dataset_id = params[:id]
+
+    # this is tricky.  need to select transactions based on having all the cells we want
+    transaction_query = Transaction.where(dataset_id: dataset_id)
+    #.where(id: TransactionCell.where(attr_val: val, index: i).select(transaction_id))
+
+    transaction_items = JSON.parse(URI.decode(params[:transaction]))
+    index = -1
+    transaction_items.each{ |item|
+      index += 1
+      attri = item["attr"]
+      val = item["val"]
+      if (attri == "TEXT")
+        val_id = DatasetValue.find_or_make(val)
+      elsif (attri == "LINK")
+        val_id = DatasetLink.find_or_make(val)
       else
-        format.html { render :edit }
-        format.json { render json: @transaction.errors, status: :unprocessable_entity }
+        puts "Uh oh, don't know the attribute type for a transaction cell."
       end
+
+      # and now edit the transaction query based on requiring this additional cell to be attached
+      transaction_query = transaction_query.where(id: TransactionCell.where(attr_val: val, index: index).select(transaction_id))
     end
+
+    exists = false;
+
+    # ok, our transaction query is ready.
+    if (transaction_query.length > 0){
+      exists = true;
+    }
+
+    render json: { exists: exists }
+
   end
 
-  # DELETE /transactions/1
-  # DELETE /transactions/1.json
-  def destroy
-    @transaction.destroy
-    respond_to do |format|
-      format.html { redirect_to transactions_url, notice: 'Transaction was successfully destroyed.' }
-      format.json { head :no_content }
-    end
-  end
-
-  private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_transaction
-      @transaction = Transaction.find(params[:id])
-    end
-
-    # Never trust parameters from the scary internet, only allow the white list through.
-    def transaction_params
-      params.require(:transaction).permit(:dataset_id)
-    end
+  
 end
