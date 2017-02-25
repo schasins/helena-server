@@ -1,9 +1,9 @@
-class TransactionsController < ApplicationController
+class TransactionRecordsController < ApplicationController
 
   def new
     dataset_id = params[:id]
     parameters = {dataset_id: dataset_id}
-    transaction = Transaction.create(parameters)
+    transaction = TransactionRecord.create(parameters)
 
     transaction_items = JSON.parse(URI.decode(params[:transaction]))
     index = -1
@@ -18,11 +18,11 @@ class TransactionsController < ApplicationController
       else
         puts "Uh oh, don't know the attribute type for a transaction cell."
       end
-      params = {transaction_id: transaction.id,
+      params = {transaction_record_id: transaction.id,
                 index: index,
                 attr_value: val}
       TransactionCell.create(params)
-    end
+    }
     render json: { transaction_id: transaction.id }
   end
 
@@ -30,7 +30,7 @@ class TransactionsController < ApplicationController
     dataset_id = params[:id]
 
     # this is tricky.  need to select transactions based on having all the cells we want
-    transaction_query = Transaction.where(dataset_id: dataset_id)
+    transaction_query = TransactionRecord.where(dataset_id: dataset_id)
     #.where(id: TransactionCell.where(attr_val: val, index: i).select(transaction_id))
 
     transaction_items = JSON.parse(URI.decode(params[:transaction]))
@@ -49,14 +49,14 @@ class TransactionsController < ApplicationController
 
       # and now edit the transaction query based on requiring this additional cell to be attached
       transaction_query = transaction_query.where(id: TransactionCell.where(attr_val: val, index: index).select(transaction_id))
-    end
+    }
 
     exists = false;
 
     # ok, our transaction query is ready.
-    if (transaction_query.length > 0){
+    if (transaction_query.length > 0)
       exists = true;
-    }
+    end
 
     render json: { exists: exists }
 
