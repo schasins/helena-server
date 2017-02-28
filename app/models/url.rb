@@ -5,9 +5,9 @@ class Url < ActiveRecord::Base
 		urls = Url.where(url: url)
 		urlObj = nil
 		if urls.length == 0
+			domain = Domain.find_or_create_by(domain: Domain.domain_of_url(url))
 			begin
 				Url.transaction(requires_new: true) do
-					domain = Domain.find_or_create_by(domain: Domain.domain_of_url(url))
 					urlObj = Url.create({url: url, domain: domain})
 	            end
 	        rescue

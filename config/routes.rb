@@ -19,8 +19,8 @@ Rails.application.routes.draw do
 
   post 'saveprogram', :to => 'programs#save_program', :as => 'saveprogram'
 
-  post 'newtransaction', :to => 'transactions#new', :as => 'newtransaction'
-  post 'transactionexists', :to => 'transactions#exists', :as => 'transactionexists'
+  post 'newtransaction', :to => 'transaction_records#new', :as => 'newtransaction'
+  post 'transactionexists', :to => 'transaction_records#exists', :as => 'transactionexists'
 
   resources :relations
   resources :columns

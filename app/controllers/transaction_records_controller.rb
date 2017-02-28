@@ -1,5 +1,8 @@
 class TransactionRecordsController < ApplicationController
 
+  skip_before_action :protect_from_forgery, :only =>[:new, :exists] # save_relation is going to be coming from the Chrome extension, so can't get the CSRF token.  in future should consider whether we should require some kind of authentication for this
+  protect_from_forgery with: :null_session, :only =>[:new, :exists]
+
   def new
     dataset_id = params[:id]
     parameters = {dataset_id: dataset_id}

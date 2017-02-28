@@ -1,6 +1,9 @@
 class Domain < ActiveRecord::Base
 
 	def self.domain_of_url(url)
+    if (url.nil?)
+      return nil
+    end
     domain = ""
     # don't need http and so on
     if (url.index("://") != nil) 

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170224233526) do
+ActiveRecord::Schema.define(version: 20170228015108) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -114,15 +114,15 @@ ActiveRecord::Schema.define(version: 20170224233526) do
   add_index "relations", ["url_id"], name: "index_relations_on_url_id", using: :btree
 
   create_table "transaction_cells", force: :cascade do |t|
-    t.integer  "transaction_id"
+    t.integer  "transaction_record_id"
     t.integer  "attr_value"
-    t.datetime "created_at",     null: false
-    t.datetime "updated_at",     null: false
+    t.datetime "created_at",            null: false
+    t.datetime "updated_at",            null: false
     t.integer  "index"
   end
 
   add_index "transaction_cells", ["index", "attr_value"], name: "index_transaction_cells_on_index_and_attr_value", using: :btree
-  add_index "transaction_cells", ["transaction_id"], name: "index_transaction_cells_on_transaction_id", using: :btree
+  add_index "transaction_cells", ["transaction_record_id"], name: "index_transaction_cells_on_transaction_record_id", using: :btree
 
   create_table "transaction_records", force: :cascade do |t|
     t.integer  "dataset_id"
@@ -151,7 +151,7 @@ ActiveRecord::Schema.define(version: 20170224233526) do
   add_foreign_key "program_uses_relations", "programs"
   add_foreign_key "program_uses_relations", "relations"
   add_foreign_key "relations", "urls"
-  add_foreign_key "transaction_cells", "transaction_records", column: "transaction_id"
+  add_foreign_key "transaction_cells", "transaction_records"
   add_foreign_key "transaction_records", "datasets"
   add_foreign_key "urls", "domains"
 end
