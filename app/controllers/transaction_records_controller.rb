@@ -51,11 +51,10 @@ class TransactionRecordsController < ApplicationController
       end
 
       # and now edit the transaction query based on requiring this additional cell to be attached
-      transaction_query = transaction_query.where(id: TransactionCell.where(attr_val: val, index: index).select(transaction_id))
+      transaction_query = transaction_query.where(id: TransactionCell.where(attr_value: val, index: index).select(:transaction_record_id))
     }
 
     exists = false;
-
     # ok, our transaction query is ready.
     if (transaction_query.length > 0)
       exists = true;
