@@ -4,7 +4,7 @@ class TransactionRecordsController < ApplicationController
   protect_from_forgery with: :null_session, :only =>[:new, :exists]
 
   def new
-    dataset_id = params[:id]
+    dataset_id = params[:dataset]
     parameters = {dataset_id: dataset_id}
     transaction = TransactionRecord.create(parameters)
 
@@ -23,14 +23,14 @@ class TransactionRecordsController < ApplicationController
       end
       params = {transaction_record_id: transaction.id,
                 index: index,
-                attr_value: val}
+                attr_value: val_id}
       TransactionCell.create(params)
     }
     render json: { transaction_id: transaction.id }
   end
 
   def exists
-    dataset_id = params[:id]
+    dataset_id = params[:dataset]
 
     # this is tricky.  need to select transactions based on having all the cells we want
     transaction_query = TransactionRecord.where(dataset_id: dataset_id)
@@ -51,7 +51,7 @@ class TransactionRecordsController < ApplicationController
       end
 
       # and now edit the transaction query based on requiring this additional cell to be attached
-      transaction_query = transaction_query.where(id: TransactionCell.where(attr_value: val, index: index).select(:transaction_record_id))
+      transaction_query = transaction_query.where(id: TransactionCell.where(attr_value: val_id, index: index).select(:transaction_record_id))
     }
 
     exists = false;
