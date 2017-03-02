@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170228015108) do
+ActiveRecord::Schema.define(version: 20170301235251) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -126,8 +126,9 @@ ActiveRecord::Schema.define(version: 20170228015108) do
 
   create_table "transaction_records", force: :cascade do |t|
     t.integer  "dataset_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at",    null: false
+    t.datetime "updated_at",    null: false
+    t.integer  "annotation_id"
   end
 
   add_index "transaction_records", ["dataset_id"], name: "index_transaction_records_on_dataset_id", using: :btree

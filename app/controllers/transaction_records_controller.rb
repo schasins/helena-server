@@ -5,10 +5,11 @@ class TransactionRecordsController < ApplicationController
 
   def new
     dataset_id = params[:dataset]
-    parameters = {dataset_id: dataset_id}
+    annotation_id = params[annotation_id]
+    parameters = {dataset_id: dataset_id, annotation_id: annotation_id}
     transaction = TransactionRecord.create(parameters)
 
-    transaction_items = JSON.parse(URI.decode(params[:transaction]))
+    transaction_items = JSON.parse(URI.decode(params[:transaction_attributes]))
     index = -1
     transaction_items.each{ |item|
       index += 1
@@ -31,12 +32,13 @@ class TransactionRecordsController < ApplicationController
 
   def exists
     dataset_id = params[:dataset]
+    annotation_id = params[:annotation_id]
 
     # this is tricky.  need to select transactions based on having all the cells we want
-    transaction_query = TransactionRecord.where(dataset_id: dataset_id)
+    transaction_query = TransactionRecord.where(dataset_id: dataset_id, annotation_id: annotation_id)
     #.where(id: TransactionCell.where(attr_val: val, index: i).select(transaction_id))
 
-    transaction_items = JSON.parse(URI.decode(params[:transaction]))
+    transaction_items = JSON.parse(URI.decode(params[:transaction_attributes]))
     index = -1
     transaction_items.each{ |item|
       index += 1
