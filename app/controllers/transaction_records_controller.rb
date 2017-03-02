@@ -16,15 +16,15 @@ class TransactionRecordsController < ApplicationController
       attri = item["attr"]
       val = item["val"]
       if (attri == "TEXT")
-        val_id = DatasetValue.find_or_make(val)
+        val_obj = DatasetValue.find_or_make(val)
       elsif (attri == "LINK")
-        val_id = DatasetLink.find_or_make(val)
+        val_obj = DatasetLink.find_or_make(val)
       else
         puts "Uh oh, don't know the attribute type for a transaction cell."
       end
       params = {transaction_record_id: transaction.id,
                 index: index,
-                attr_value: val_id}
+                attr_value: val_obj.id}
       TransactionCell.create(params)
     }
     render json: { transaction_id: transaction.id }
@@ -41,19 +41,21 @@ class TransactionRecordsController < ApplicationController
     transaction_items = JSON.parse(URI.decode(params[:transaction_attributes]))
     index = -1
     transaction_items.each{ |item|
+      # puts item
+      # puts "****"
       index += 1
       attri = item["attr"]
       val = item["val"]
       if (attri == "TEXT")
-        val_id = DatasetValue.find_or_make(val)
+        val_obj = DatasetValue.find_or_make(val)
       elsif (attri == "LINK")
-        val_id = DatasetLink.find_or_make(val)
+        val_obj = DatasetLink.find_or_make(val)
       else
         puts "Uh oh, don't know the attribute type for a transaction cell."
       end
 
       # and now edit the transaction query based on requiring this additional cell to be attached
-      transaction_query = transaction_query.where(id: TransactionCell.where(attr_value: val_id, index: index).select(:transaction_record_id))
+      transaction_query = transaction_query.where(id: TransactionCell.where(attr_value: val_obj.id, index: index).select(:transaction_record_id))
     }
 
     exists = false;
