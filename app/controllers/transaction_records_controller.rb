@@ -5,7 +5,7 @@ class TransactionRecordsController < ApplicationController
 
   def new
     dataset_id = params[:dataset]
-    annotation_id = params[annotation_id]
+    annotation_id = params[:annotation_id]
     parameters = {dataset_id: dataset_id, annotation_id: annotation_id}
     transaction = TransactionRecord.create(parameters)
 
