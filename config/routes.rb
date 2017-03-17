@@ -21,6 +21,7 @@ Rails.application.routes.draw do
   post 'saveprogram', :to => 'programs#save_program', :as => 'saveprogram'
 
   post 'newtransaction', :to => 'transaction_records#new', :as => 'newtransaction'
+  post 'newtransactionwithdata', :to => 'transaction_records#new_with_dataset_slice', :as => 'newtransactionwithdata'
   post 'transactionexists', :to => 'transaction_records#exists', :as => 'transactionexists'
 
   resources :relations
