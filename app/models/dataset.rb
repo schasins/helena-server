@@ -20,6 +20,7 @@ class Dataset < ActiveRecord::Base
 	        index += 1
 	        text = node["text"]
 	        link = node["link"]
+                date = Time.at(node["date"]/1000)
 	        scraped_attribute = node["scraped_attribute"]
 	        source_url = node["source_url"]
 	        top_frame_source_url = node["top_frame_source_url"]
@@ -36,7 +37,8 @@ class Dataset < ActiveRecord::Base
 		  			parameters = {dataset_id: dataset_id, 
 	            dataset_value_id: text_object.id, 
 	            dataset_link_id: link_object.id, 
-	            scraped_attribute: scraped_attribute_num, 
+	            scraped_attribute: scraped_attribute_num,
+                    scraped_timestamp: date,
 	            source_url_id: source_url_object.id,
 	            top_frame_source_url_id: top_frame_source_url_object.id,
 	            row: coords[0], 
