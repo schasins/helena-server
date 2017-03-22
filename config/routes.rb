@@ -17,6 +17,7 @@ Rails.application.routes.draw do
   post 'datasetslice', :to => 'datasets#save_slice', :as => 'datasetslice'
   get 'datasets/:id' => 'datasets#download'
   get 'datasetsforgiving/:id' => 'datasets#downloadforgiving'
+  get 'downloaddetailed/:id' => 'datasets#downloaddetailed'
 
   post 'saveprogram', :to => 'programs#save_program', :as => 'saveprogram'
 
