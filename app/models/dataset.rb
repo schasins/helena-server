@@ -20,8 +20,12 @@ class Dataset < ActiveRecord::Base
 	        index += 1
 	        text = node["text"]
 	        link = node["link"]
-                date = Time.at(node["date"]/1000)
-	        scraped_attribute = node["scraped_attribute"]
+                if (node["date"])
+                  date = Time.at(node["date"]/1000)
+	        else
+                  date = nil
+                end
+                scraped_attribute = node["scraped_attribute"]
 	        source_url = node["source_url"]
 	        top_frame_source_url = node["top_frame_source_url"]
 
