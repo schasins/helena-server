@@ -14,6 +14,7 @@ Rails.application.routes.draw do
   post 'allpagerelations', :to => 'relations#all_page_relations', :as => 'allpagerelations'
 
   post 'newdatasetsid', :to => 'datasets#new', :as => 'newdatasetsid'
+  post 'updatedataset', :to => 'datasets#updatedataset', :as => 'updatedataset'
   post 'datasetslice', :to => 'datasets#save_slice', :as => 'datasetslice'
   get 'datasets/:id' => 'datasets#download'
   get 'datasetsforgiving/:id' => 'datasets#downloadforgiving'

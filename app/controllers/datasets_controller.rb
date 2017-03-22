@@ -20,6 +20,15 @@ class DatasetsController < ApplicationController
   	render json: { }
   end
 
+  def updatedataset
+    dataset = Dataset.find(params[:id])
+    dataset.name = params[:name]
+    dataset.program_id = params[:program_id]
+    dataset.save
+
+    render json: {}
+  end
+
   def download
   	dataset = Dataset.find(params[:id])
   	filename = dataset.name
