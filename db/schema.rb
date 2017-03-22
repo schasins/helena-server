@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170322042551) do
+ActiveRecord::Schema.define(version: 20170322060713) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -70,7 +70,10 @@ ActiveRecord::Schema.define(version: 20170322042551) do
     t.string   "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer  "program_id"
   end
+
+  add_index "datasets", ["program_id"], name: "index_datasets_on_program_id", using: :btree
 
   create_table "domains", force: :cascade do |t|
     t.text     "domain"
@@ -150,6 +153,7 @@ ActiveRecord::Schema.define(version: 20170322042551) do
   add_foreign_key "dataset_cells", "datasets"
   add_foreign_key "dataset_cells", "urls", column: "source_url_id"
   add_foreign_key "dataset_cells", "urls", column: "top_frame_source_url_id"
+  add_foreign_key "datasets", "programs"
   add_foreign_key "program_uses_relations", "programs"
   add_foreign_key "program_uses_relations", "relations"
   add_foreign_key "relations", "urls"

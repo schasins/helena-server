@@ -6,7 +6,7 @@ class DatasetsController < ApplicationController
 	protect_from_forgery with: :null_session, :only =>[:new]
 
   def new
-  	dataset = Dataset.create()
+        dataset = Dataset.create(params.permit(:program_id, :name))
   	render json: { id: dataset.id }
   end
 
