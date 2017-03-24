@@ -29,6 +29,12 @@ class DatasetsController < ApplicationController
     render json: {}
   end
 
+  def programfordataset
+    dataset = Dataset.find(params[:id])
+    prog_id = dataset.program_id
+    render json: {program_id: prog_id}
+  end
+
   def gen_filename(dataset)
       fn = dataset.name
       if (fn == nil or fn == "")
