@@ -29,12 +29,18 @@ class DatasetsController < ApplicationController
     render json: {}
   end
 
+  def gen_filename(dataset)
+      fn = dataset.name
+      if (fn == nil or fn == "")
+          fn = "dataset"
+      end
+      fn = fn + "_" + dataset.id.to_s
+      return fn
+  end
+
   def download
   	dataset = Dataset.find(params[:id])
-  	filename = dataset.name
-  	if (filename == nil or filename == "")
-  		filename = "dataset"
-  	end
+  	filename = gen_filename(dataset)
 
   	cells = DatasetCell.includes(:dataset_value, :dataset_link).where({dataset_id: params[:id]}).order(row: :asc, col: :asc)
   	rows = []
@@ -65,10 +71,7 @@ class DatasetsController < ApplicationController
 
   def downloaddetailed
   	dataset = Dataset.find(params[:id])
-  	filename = dataset.name
-  	if (filename == nil or filename == "")
-  		filename = "dataset"
-  	end
+  	filename = gen_filename(dataset)
 
   	cells = DatasetCell.includes(:dataset_value, :dataset_link).where({dataset_id: params[:id]}).order(row: :asc, col: :asc)
   	rows = []
@@ -100,10 +103,7 @@ class DatasetsController < ApplicationController
 
   def downloadforgiving
   	dataset = Dataset.find(params[:id])
-  	filename = dataset.name
-  	if (filename == nil or filename == "")
-  		filename = "dataset"
-  	end
+  	filename = gen_filename(dataset)
 
   	cells = DatasetCell.includes(:dataset_value, :dataset_link).where({dataset_id: params[:id]}).order(row: :asc, col: :asc)
   	rows = []
