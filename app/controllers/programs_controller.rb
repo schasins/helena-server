@@ -14,8 +14,10 @@ class ProgramsController < ApplicationController
   def save_program
     relation_objects = params[:relation_objects]
     relations = []
-    relation_objects.each do |key, value|
-      relations.push(Relation.save_relation(value))
+    if relation_objects
+      relation_objects.each do |key, value|
+        relations.push(Relation.save_relation(value))
+      end
     end
 
     programs = Program.where(id: params[:id])
