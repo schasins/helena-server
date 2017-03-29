@@ -107,6 +107,34 @@ class DatasetsController < ApplicationController
 
   end
 
+  def downloaddetailedallattributes
+  	dataset = Dataset.find(params[:id])
+  	filename = gen_filename(dataset)
+
+  	cells = DatasetCell.includes(:dataset_value, :dataset_link).where({dataset_id: params[:id]}).order(row: :asc, col: :asc)
+  	rows = []
+  	currentRowIndex = -1;
+  	cells.each{ |cell|
+  		if (cell.row != currentRowIndex)
+  			currentRowIndex = cell.row
+  			rows.push([])
+  		end
+
+      # just go ahead and put in both text and link
+        rows[currentRowIndex].push(cell.dataset_value.text)
+        rows[currentRowIndex].push(cell.dataset_link.link)
+
+      rows[currentRowIndex].push(cell.scraped_timestamp.to_i)
+  	}
+
+  	@rows = rows
+
+    response.headers['Content-Type'] = 'text/csv'
+    response.headers['Content-Disposition'] = 'attachment; filename=' + filename + '.csv'    
+    render :template => "datasets/download.csv.erb"
+
+  end
+
   def downloadforgiving
   	dataset = Dataset.find(params[:id])
   	filename = gen_filename(dataset)

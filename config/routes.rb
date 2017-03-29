@@ -20,6 +20,7 @@ Rails.application.routes.draw do
   get 'datasets/:id' => 'datasets#download'
   get 'datasetsforgiving/:id' => 'datasets#downloadforgiving'
   get 'downloaddetailed/:id' => 'datasets#downloaddetailed'
+  get 'downloaddetailedallattributes/:id' => 'datasets#downloaddetailedallattributes'
 
   post 'saveprogram', :to => 'programs#save_program', :as => 'saveprogram'
 
