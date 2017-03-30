@@ -25,17 +25,8 @@ class StoreHandler(BaseHTTPRequestHandler):
 			if self.path.endswith(".html"):
 				mimetype='text/html'
 				sendReply = True
-			if self.path.endswith(".jpg"):
-				mimetype='image/jpg'
-				sendReply = True
-			if self.path.endswith(".gif"):
-				mimetype='image/gif'
-				sendReply = True
-			if self.path.endswith(".js"):
-				mimetype='application/javascript'
-				sendReply = True
-			if self.path.endswith(".css"):
-				mimetype='text/css'
+			if self.path.endswith(".png"):
+				mimetype='image/png'
 				sendReply = True
 
 			if sendReply == True:
@@ -62,7 +53,6 @@ class StoreHandler(BaseHTTPRequestHandler):
 
                         userId = time.time() # this server is single threaded, so this is ok
 
-
                         programmerData = pjoin(curdir, 'programmerData.csv')
                         entityData = pjoin(curdir, 'entityData.csv')
                         
@@ -72,7 +62,12 @@ class StoreHandler(BaseHTTPRequestHandler):
 
                         ed = open(entityData, "a")
                         for entity in entitiesArray:
-                                entityRecord = [entity["name"], entity["index"], entity["time"], entity["clickedLink"], "\"" + str(entity["selected"])+"\""]
+                                names = entity["selected"]
+                                selectedProcessed = []
+                                for name in names:
+                                        pro = name.encode('ascii','ignore')
+                                        selectedProcessed.append(pro)
+                                entityRecord = [entity["name"], entity["index"], entity["time"], entity["clickedLink"], "\"" + ",".join(selectedProcessed)+"\""]
                                 entityRecord = [str(i) for i in entityRecord]
                                 ed.write(str(userId) + "," +  ",".join(entityRecord) + "\n")
                         ed.close()
