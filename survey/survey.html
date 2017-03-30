@@ -34,9 +34,20 @@ margin: 15px;
 padding:15px;
 border: 1px solid #DBDBDB;
 }
+#explanation{
+background-color: #E8E8E8;
+margin: 15px;
+padding:15px;
+border: 1px solid #D19494;
+font-size: 12px;
+color: #454545;
+}
 .directions{
 font-size: 12px;
 margin: 3px;
+}
+.table_title{
+	font-size: 15px;
 }
 
 button{
@@ -157,6 +168,7 @@ for (var i = 0; i < randomizeable_question_divs.length; i++){
 							    }
 
 							    function loadNewQuestion(index){
+
 							    currentRandomizableIndex = index;
 							    var question_div = $("#current_question");
 							    var navigation_div = $("#navigation");
@@ -166,6 +178,7 @@ for (var i = 0; i < randomizeable_question_divs.length; i++){
 							    navigation_div.html("");
 							    appendNextButton(navigation_div);
 							    question_div.html($("#programmer_question").html());
+							    $("#explanation").css("display", "none");
 
 							    if (isProgrammer){
 							    question_div.find("#programmer_i").attr("checked", true);
@@ -194,12 +207,14 @@ for (var i = 0; i < randomizeable_question_divs.length; i++){
 					appendPrevButton(navigation_div);
 					appendSubmitButton(navigation_div);
 					question_div.html("Ready to submit?");
+					$("#explanation").css("display", "none");
 					return;
 					}
 					
 					question_div.html(jqueryDivs[currentRandomizableIndex]);
 					var link = question_div.find("a");
 					link.click(function(){console.log("clicked link"); lastClicked = true;});
+					$("#explanation").css("display", "block");
 
 					var cells = cellsFromJqueryDiv(question_div);
 					for (var i = 0; i < cells[0].length; i++){
@@ -269,6 +284,19 @@ Finding Duplicate Data Survey
     </div>
 
   <div id="navigation"></div>
+  </div>
+
+  <div id="explanation">
+	<div class="table_title">Example</div>
+	You have a table of friends’ names, ages, birthdays, and phone numbers.  You know none of your friends share a phone number, so if you see a second row with a particular phone number, you know it refers to the same friend as the first row with that phone number.  So you select the checkbox for phone number.
+	<br>
+	<img src="ex1.png" height=80px>
+	<br>
+	Alternatively, you know two of your friends have the same name, but not the same birthday, so you select the checkboxes for name and birthday.  (Meaning if you see a second row that includes the same name AND the same birthday as an earlier row, you know it refers to the same person.)
+	<br>
+	<img src="ex2.png" height=80px>
+	<br>
+	Note: It’s important to pick birthday, not age.  Ex: You have two friends named Alice, one 37 years old, one 38. If you see [Alice, 37] and [Alice, 38], these may be separate rows for the two Alices (ex: [Alice, 37, Jan 1 1980], [Alice, 38, Feb 2 1979]), or they may be two rows for the older Alice that were retrieved at different times (ex: [Alice, 37, Feb 2 1979], [Alice, 38, Feb 2 1979]).  If you select birthday, not age, you will be able to collapse these two rows when they refer to the same Alice, because they will include the same birthday.  The general rule is we shouldn't include columns if the person’s value for the column may change frequently -- current favorite book, most recent meal, so on.
   </div>
 
 
