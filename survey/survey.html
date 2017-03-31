@@ -173,43 +173,55 @@ for (var i = 0; i < randomizeable_question_divs.length; i++){
 							    var question_div = $("#current_question");
 							    var navigation_div = $("#navigation");
 
-							    if (index === -1){
-							    // put the question about programmer, not programmer back in
-							    navigation_div.html("");
-							    appendNextButton(navigation_div);
-							    question_div.html($("#programmer_question").html());
-							    $("#explanation").css("display", "none");
+		if (index === -1){
+			navigation_div.html("");
+			appendNextButton(navigation_div);
+			question_div.html("Consent stuff.");
+		}
+	    if (index === -2){
+		    // put the question about programmer, not programmer back in
+		    navigation_div.html("");
+		    appendNextButton(navigation_div);
+		    question_div.html($("#programmer_question").html());
+		    $("#explanation").css("display", "none");
 
-							    if (isProgrammer){
-							    question_div.find("#programmer_i").attr("checked", true);
-							    }
-							    else{
-							    question_div.find("#nonprogrammer_i").attr("checked", true);
-							    }
+		    if (isProgrammer){
+		    question_div.find("#programmer_i").attr("checked", true);
+		    }
+		    else{
+		    question_div.find("#nonprogrammer_i").attr("checked", true);
+		    }
 
-							    question_div.find("#nonprogrammer").click(function(){
-							    isProgrammer = false;
-							    question_div.find("#programmer_i").attr("checked", false);
-							    question_div.find("#nonprogrammer_i").attr("checked", true);
-							    console.log(isProgrammer);
-							    });
-							    question_div.find("#programmer").click(function(){
-							    isProgrammer = true;
-							    question_div.find("#nonprogrammer_i").attr("checked", false);
-							    question_div.find("#programmer_i").attr("checked", true);
-							    console.log(isProgrammer);
-							    });
-							    return;
-							    }
+		    question_div.find("#nonprogrammer").click(function(){
+		    isProgrammer = false;
+		    question_div.find("#programmer_i").attr("checked", false);
+		    question_div.find("#nonprogrammer_i").attr("checked", true);
+		    console.log(isProgrammer);
+		    });
+		    question_div.find("#programmer").click(function(){
+		    isProgrammer = true;
+		    question_div.find("#nonprogrammer_i").attr("checked", false);
+		    question_div.find("#programmer_i").attr("checked", true);
+		    console.log(isProgrammer);
+		    });
+		    return;
+	    }
+	    if (index === -3){
+			navigation_div.html("");
+			appendNextButton(navigation_div);
+			question_div.html($("#tutorial").html());
+		}
 
-							    if (index >= jqueryDivs.length){
-					navigation_div.html("");
-					appendPrevButton(navigation_div);
-					appendSubmitButton(navigation_div);
-					question_div.html("Ready to submit?");
-					$("#explanation").css("display", "none");
-					return;
-					}
+		if (index >= jqueryDivs.length){
+			navigation_div.html("");
+			appendPrevButton(navigation_div);
+			appendSubmitButton(navigation_div);
+			question_div.html("Ready to submit?");
+			$("#explanation").css("display", "none");
+			return;
+		}
+
+		// otherwise we're in one of the table questions, so handle that
 					
 					question_div.html(jqueryDivs[currentRandomizableIndex]);
 					var link = question_div.find("a");
