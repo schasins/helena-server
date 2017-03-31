@@ -49,6 +49,9 @@ margin: 3px;
 .table_title{
 	font-size: 15px;
 }
+.small{
+	font-size: 12px;
+}
 
 button{
 margin-top: 5px;
@@ -106,14 +109,14 @@ for (var i = 0; i < randomizeable_question_divs.length; i++){
 		    if (question.data("url")){
 		    var url = question.data("url");
 		    var link = $("<a href=\""+ url +"\" target=\"_blank\">"+url+"</a>");
-		    var urlDiv = $("<div>You can explore the data source here if you want to see more rows: </div>");
+		    var urlDiv = $("<div class='small'>You can explore the data source here if you want to see more items: </div>");
 		    urlDiv.append(link);
 		    question.append(urlDiv);
 		    }
 
 		    // now make the directions
 		    var directions_text = $("#directions").html();
-		    directions_text = directions_text.replace("{entity}", question.data("entity")).replace("{entity}", question.data("entity"));
+		    directions_text = directions_text.replace("{entity}", question.data("entity")).replace("{entity}", question.data("entity")).replace("{shortentity}", question.data("short-entity"));
 		    question.find(".directions").html(directions_text);
 
 
@@ -206,7 +209,7 @@ for (var i = 0; i < randomizeable_question_divs.length; i++){
 					navigation_div.html("");
 					appendPrevButton(navigation_div);
 					appendSubmitButton(navigation_div);
-					question_div.html("Ready to submit?");
+					question_div.html("Ready to submit?  Feel free to go back and change answers to any question if you want.");
 					$("#explanation").css("display", "none");
 					return;
 					}
@@ -286,17 +289,49 @@ Finding Duplicate Data Survey
   <div id="navigation"></div>
   </div>
 
-  <div id="explanation">
+  <div id="explanation-1", class="explanation">
 	<div class="table_title">Example</div>
-	You have a table of friends' names, ages, birthdays, and phone numbers.  You know none of your friends share a phone number, so if you see a second row with a particular phone number, you know it refers to the same friend as the first row with that phone number.  So you select the checkbox for phone number.
+
+	<div class="example_title">The situation:</div>
+	You have a table of friends' names, ages, birthdays, and phone numbers.  Unfortunately, many friends appear in the table multiple times because the information has been collected several times.  You want a table that only lists each friend once, so you need to combine all the rows that refer to the same friend.  The goal is to collapse all the rows that refer to a single friend without collapsing rows that refer to different friends.
 	<br>
+	You're going to be picking a set of columns from the table.  If two rows have the same values in all of your selected columns, we'll merge the rows.  If they don't, we'll assume they refer to two different people.  You'll need to use your knowledge of what attributes tend to be unique about your friends.  You'll also need to use your knowledge of what attributes tend to stay the same over time.
+
+	<div class="example_title">The data:</div>
+	In this snippet of the table, the first two rows are from the same Alice at different points in time.  Her birthday and phone number are the same, but she was 37 for one of the rows and 38 for another.  The third and fourth rows refer to two different friends, both named Bob.
+	<table>
+	  <tr><td>name</td><td>age</td><td>birthday</td><td>phone_number</td></tr>
+	  <tr><td>Alice</td><td>37</td><td>Feb 2, 1979</td><td>555-555-5555</td></tr>
+	  <tr><td>Alice</td><td>38</td><td>Feb 2, 1979</td><td>555-555-5555</td></tr>
+	  <tr><td>Bob</td><td>37</td><td>Jan 1, 1979</td><td>777-777-7777</td></tr>
+	  <tr><td>Bob</td><td>38</td><td>May 20, 1979</td><td>999-999-9999</td></tr>
+	</table>
+
+	<div class="example_title">Some bad solutions:</div>
+	<span class="selection">NAME</span>:
+	Just selecting <span class="selection">NAME</span> doesn't work because although we successfully collapse the two Alice rows that refer to a single friend, we also collapse the two Bobs, even though they're different friends.
+	<br>
+	The bad outcome: we got rid of a Bob!
+	<span class="selection">NAME AND AGE</span>:
+	Selecting <span class="selection">NAME AND AGE</span> doesn't work because even though we now distinguish between between the two Bobs, we also distinguish between the two Alice rows, even though they refer to the same friend.
+	<br>
+	The bad outcome: we kept a fake Alice!
+
+	<div class="example_title">Some good solutions:</div>
+		
+	<span class="selection">PHONE_NUMBER</span>:
 	<img src="ex1.png" height=80px>
+	You know none of your friends share a phone number, so if you see a second row with a particular phone number, you know it refers to the same friend as the first row with that phone number.  You merge the Alice rows and keep both Bobs!
 	<br>
-	Alternatively, you know two of your friends have the same name, but not the same birthday, so you select the checkboxes for name and birthday.  (Meaning if you see a second row that includes the same name AND the same birthday as an earlier row, you know it refers to the same person.)
-	<br>
+
+	<span class="selection">NAME AND BIRTHDAY</span>:
 	<img src="ex2.png" height=80px>
-	<br>
-	Note: It's important to pick birthday, not age.  Ex: You have two friends named Alice, one 37 years old, one 38. If you see [Alice, 37] and [Alice, 38], these may be separate rows for the two Alices (ex: [Alice, 37, 1-1-1980], [Alice, 38, 2-2-1979]), or they may be two rows for the older Alice that were retrieved at different times (ex: [Alice, 37, 2-2-1979], [Alice, 38, 2-2-1979]).  If you select birthday, not age, you will be able to collapse these two rows when they refer to the same Alice, because they will include the same birthday.  The general rule is we shouldn't include columns if the person's value for the column may change frequently -- age, current favorite book, most recent meal, so on.
+	Alternatively, you know the Bobs have the same name, but not the same birthday, so you select the checkboxes for name and birthday.  Even though Alice is in the table multiple times, her birthday won't change, so you merge the Alice rows and keep both Bobs!
+  </div>
+
+
+  <div id="explanation-2", class="explanation">
+  	For the rest of this survey, you'll be completing this same task, but not for friends -- instead you'll be completing the task for eight different entities.  You'll only see the first row of the table, so you'll need to think about what attributes are unique about the rows and what attributes will stay the same over time.
   </div>
 
 
@@ -312,25 +347,25 @@ Finding Duplicate Data Survey
     </table>
 </div>
 
-<div class="randomizeable" data-name="twitterfoundations" data-entity="foundation">
+<div class="randomizeable" data-name="twitterfoundations" data-entity="foundation" data-short-entity="foundation">
 <div class="table_title">Charitable Foundations</div>
 <div class="directions"></div>
 <table><tbody><tr><td><input type="checkbox"></td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><input type="checkbox"></td></tr><tr><td>foundation_rank</td><td>name</td><td>name_alternate</td><td>url</td><td>url_2</td></tr><tr><td>1</td><td>Bill &amp; Melinda Gates Foundation</td><td>Gates Foundation, Bill &amp; Melinda</td><td>https://twitter.com/gatesfoundation/with_replies</td><td>https://twitter.com/gatesfoundation/</td></tr></tbody></table>
 </div>
 
-<div class="randomizeable" data-name="zimride" data-entity="carpool listing">
-<div class="table_title">Zimride Carpool Listings</div>
+<div class="randomizeable" data-name="zimride" data-entity="carpool ride listing" data-short-entity="listing">
+<div class="table_title">Zimride Carpool Listings (for offering or requesting rides)</div>
 <div class="directions"></div>
 <table><tbody><tr><td><input type="checkbox"></td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><input type="checkbox"></td></tr><tr><td>carpool_endpoints</td><td>user_name</td><td>carpool_times</td><td>driver_or_passenger</td><td>carpool_days</td></tr><tr><td>Bothell<br>To and From<br>Seattle</td><td>Sam V</td><td>Commute MTWTF 6:00am / 4:15pm ±30m</td><td>passenger</td><td>Sam takes this trip every<br>                                                                                                            Mon,                                                                                                                                                Tue,                                                                                                                                                Wed,                                                                                                                                                Thu,                                                                                                                                                Fri</td></tr></tbody></table>
 </div>
 
-<div class="randomizeable" data-name="communityfoundations"  data-entity="foundation">
+<div class="randomizeable" data-name="communityfoundations"  data-entity="foundation" data-short-entity="foundation">
 <div class="table_title">Community Foundations</div>
 <div class="directions"></div>
 <table><tbody><tr><td><input type="checkbox"></td><td><input type="checkbox"></td></tr><tr><td>foundation_id</td><td>foundation_url</td></tr><tr><td>2</td><td>http://communityfoundationatlas.org/explore/#foundation=2</td></tr></tbody></table>
 </div>
 
-<div class="randomizeable" data-name="restaurants"  data-entity="restaurant" data-url="https://www.yelp.com/search?find_desc=Restaurants&find_loc=Seattle%2C+WA&ns=1">
+<div class="randomizeable" data-name="restaurants"  data-entity="restaurant" data-short-entity="restaurant" data-url="https://www.yelp.com/search?find_desc=Restaurants&find_loc=Seattle%2C+WA&ns=1">
 <div class="table_title">Restaurants</div>
 <div class="directions"></div>
 <table><tbody><tr><td><input type="checkbox"></td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><input type="checkbox"></td></tr>
@@ -340,7 +375,7 @@ Finding Duplicate Data Survey
 
 ------
 
-<div class="randomizeable" data-name="tweets" data-entity="tweet" data-url="https://twitter.com/gatesfoundation?lang=en">
+<div class="randomizeable" data-name="tweets" data-entity="tweet" data-short-entity="tweet" data-url="https://twitter.com/gatesfoundation?lang=en">
 <div class="table_title">Tweets</div>
 <div class="directions"></div>
 <table><tbody><tr><td><input type="checkbox"></td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><input type="checkbox"></td>
@@ -348,19 +383,19 @@ Finding Duplicate Data Survey
 <tr><td>Gates Foundation</td><td></td><td></td><td></td><td>199</td><td></td><td>163</td><td></td><td>It's<br>#<br>IWD2017<br>and 225 million women in the developing world still don't have access to contraceptives. Four families share why it's so vital<br>pic.twitter.com/P7eS5EjXxh</td><td></td><td>3 h</td><td>https://twitter.com/gatesfoundation/status/839462156013690881</td><td>gatesfoundation</td><td></td></tr></tbody></table>
 </div>
 
-<div class="randomizeable" data-name="reviews" data-entity="review" data-url="https://www.yelp.com/biz/paseo-caribbean-food-fremont-seattle-2?osq=Restaurants">
+<div class="randomizeable" data-name="reviews" data-entity="restuarant review" data-short-entity="review" data-url="https://www.yelp.com/biz/paseo-caribbean-food-fremont-seattle-2?osq=Restaurants">
 <div class="table_title">Restaurant Review</div>
 <div class="directions"></div>
 <table><tbody><tr><td><input type="checkbox"></td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><input type="checkbox"></td></tr><tr><td>text text</td><td>text link</td><td>date text</td><td>date link</td><td>rating text</td><td>rating link</td><td>reviewer_city text</td><td>reviewer_city link</td><td>reviewer text</td><td>reviewer link</td></tr><tr><td>It is that good, even for vegetarians.<br>The tofu is perfectly seasoned over a bed of rice with a rich tomato sauce and refreshing salad. The side of black beans is more of a soupy mixture that tastes delicious when drizzled over the rest of the food. Even the corn on the cob was worth eating.<br>Rightly so, the place filled in quickly so plan on getting there during a non-busy hour or taking this to go. Whatever you do, just make sure you get there.</td><td></td><td>3/11/2017</td><td></td><td>5.0 star rating</td><td></td><td>Seattle, WA</td><td></td><td>Katy H.</td><td>https://www.yelp.com/user_details?userid=VGPcMHDu2Ni0qzJtlprNXw</td></tr></tbody></table>
 </div>
 
-<div class="randomizeable" data-name="menuitems" data-entity="menu item" data-url="https://www.yelp.com/menu/paseo-caribbean-food-fremont-seattle-2">
+<div class="randomizeable" data-name="menuitems" data-entity="menu item" data-short-entity="item" data-url="https://www.yelp.com/menu/paseo-caribbean-food-fremont-seattle-2">
 <div class="table_title">Menu Items</div>
 <div class="directions"></div>
 <table><tbody><tr><td><input type="checkbox"></td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><input type="checkbox"></td></tr><tr><td>photos text</td><td>photos link</td><td>reviews text</td><td>reviews link</td><td>description text</td><td>description link</td><td>price text</td><td>price link</td><td>name text</td><td>name link</td></tr><tr><td>18 photos</td><td>https://www.yelp.com/menu/paseo-caribbean-food-fremont-seattle-2/item/grilled-pork</td><td>130 reviews</td><td>https://www.yelp.com/menu/paseo-caribbean-food-fremont-seattle-2/item/grilled-pork#menu-reviews</td><td>cubed pork loin grilled over lava rocks &amp; basted w/ paseo marinade until golden brown.</td><td></td><td>$8.50</td><td></td><td>Grilled Pork</td><td></td></tr></tbody></table>
 </div>
 
-<div class="randomizeable" data-name="craigslist" data-entity="craigslist listing" data-url="https://seattle.craigslist.org/search/apa">
+<div class="randomizeable" data-name="craigslist" data-entity="craigslist apartment listing" data-short-entity="listing" data-url="https://seattle.craigslist.org/search/apa">
 <div class="table_title">Craigslist Listings</div>
 <div class="directions"></div>
 <table><tbody><tr><td><input type="checkbox"></td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><input type="checkbox"></td></tr><tr><td>relation_1_item_5 text</td><td>relation_1_item_5 link</td><td>relation_1_item_3 text</td><td>relation_1_item_3 link</td><td>relation_1_item_1 text</td><td>relation_1_item_1 link</td><td>relation_1_item_6 text</td><td>relation_1_item_6 link</td><td>relation_1_item_4 text</td><td>relation_1_item_4 link</td><td>relation_1_item_2 text</td><td>relation_1_item_2 link</td></tr><tr><td>$1465<br>1br -<br>                    580ft<br>2<br>-<br>(Downtown Bellevue)<br>pic<br>map<br>hide this posting<br>restore<br>restore this posting</td><td></td><td>$1465</td><td></td><td>Feb 21</td><td></td><td>(Downtown Bellevue)</td><td></td><td>1br -<br>                    580ft<br>2<br>-</td><td></td><td>Studio w/ Den and Patio! Available March 4th!</td><td>https://seattle.craigslist.org/est/apa/6014028599.html</td></tr></tbody></table>
@@ -374,9 +409,7 @@ Example Table
 </table>
 
 <div id="directions">
-You have a table of data.  The rows have been collected at various different points in time.  Each row represents a {entity}.  Some rows are duplicates -- they don't have identical values in all columns, but they represent the same {entity}.  We want to throw out duplicates without throwing out non-duplicates.  You will pick a set of columns that will control how we discard rows.  If two rows have the same values in all the columns you select, we will throw out one of the rows.  Your goal is to throw out as many duplicates as possible without throwing away any non-duplicates.  Select as many columns as you like.
-<br>
-If you would like to see a concrete example, please see the example box below.
+Each row represents a <span class="entity">{entity}</span>.  Some {shortentity}s appear more than once.  Pick columns that identify unique  <span class="entity">{entity}s</span>.
 </div>
 
 </div>
