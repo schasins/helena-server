@@ -250,7 +250,8 @@ for (var i = 0; i < randomizeable_question_divs.length; i++){
 			if (index === -4){
 				navigation_div.html("");
 				appendNextButton(navigation_div);
-				question_div.html("Consent stuff.");
+				question_div.html($("#consent").html());
+				return;
 			}
 			if (index === -3){
 		    // put the question about programmer, not programmer back in
@@ -295,6 +296,7 @@ for (var i = 0; i < randomizeable_question_divs.length; i++){
 			navigation_div.html("");
 			appendPrevButton(navigation_div);
 			appendNextButton(navigation_div);
+			appendNumberNav(navigation_div);
 			question_div.html($("#tutorial-2").html());
 			return;
 		}
@@ -565,7 +567,7 @@ Finding Duplicate Data Survey
 
   	<br><br>
 
-  	Feel free to use the "Prev" button to get back to the tutorial at any time, or to go back to edit your answers.
+  	Feel free to use the "Prev" button (or the page-specific buttons) to get back to the tutorial at any time, or to go back to edit your answers.
 
   	<br><br>
 
@@ -652,6 +654,44 @@ Example Table
 
 <div id="directions">
 Each row represents a <span class="entity">{entity}</span>.  Some {shortentity}s appear more than once.  Pick columns that identify unique  <span class="entity">{entity}s</span>.
+</div>
+
+<div id="consent">
+<div class="small">
+<center>
+<b>
+University of California at Berkeley<br>
+Consent to Participate in Research<br>
+<i>Finding Duplicate Data</i>
+</b>
+</center>
+<br><br>
+
+<b>Introduction and Purpose </b><br>
+My name is Sarah Chasins.  I am a graduate student at the University of California, Berkeley in the Department of Computer Science.  I would like to invite you to take part in my research study, which concerns finding duplicate data.
+<br><br>
+<b>Procedures</b><br>
+If you agree to participate in my research, I will ask you to complete this online survey.  The survey will involve questions about data uniqueness, and should take about 15 minutes to complete.
+<br><br>
+<b>Benefits</b><br>
+There is no direct benefit to you from taking part in this study.  It is hoped that the research will help evaluate a programming tool.
+<br><br>
+<b>Risks/Discomforts</b><br>
+As with all research, there is a chance that our data could be compromised; however, we will not ask for (and therefore will not store) any personally identifying information about you.
+<br><br>
+<b>Compensation</b><br>
+You will not be paid for taking part in this study.
+<br><br>
+<b>Rights</b><br>
+<b><i>Participation in research is completely voluntary.</i></b>  You are free to decline to take part in the project.  You can decline to answer any questions and are free to stop taking part in the project at any time.  Whether or not you choose to participate, to answer any particular question, or continue participating in the project, there will be no penalty to you or loss of benefits to which you are otherwise entitled.
+<br><br>
+<b>Questions</b><br>
+If you have any questions about this research, please feel free to contact me.  I can be reached at schasins at eecs dot berkeley dot edu.
+<br><br>
+If you have any questions about your rights or treatment as a research participant in this study, please contact the University of California at Berkeley’s Committee for Protection of Human Subjects at 510-642-7461, or e-mail subjects@berkeley.edu. 
+<br><br>
+<b>If you agree to take part in the research, please press the “Next” button below.</b>
+</div>
 </div>
 
 </div>
