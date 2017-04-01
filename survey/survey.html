@@ -14,11 +14,11 @@ table, tr, td {
 border: 1px solid #DBDBDB;
 font-family: 'Montserrat', Trebuchet MS,Tahoma,Verdana,Arial,sans-serif;
 font-size: 11px;
-background-color: white;
 padding: 2px;
 }
 table {
 border-collapse: collapse;
+background-color: white;
 margin: 5px;
 }
 body {
@@ -48,9 +48,50 @@ margin: 3px;
 }
 .table_title{
 	font-size: 15px;
+	padding-bottom: 10px;
+}
+.example_title{
+	font-size: 13px;
+	font-weight:bold;
+	padding-top: 10px;
+	padding-bottom: 10px;
 }
 .small{
 	font-size: 12px;
+}
+.selection{
+	font-weight: bold;
+	color:#65A365;
+}
+.invisible{
+	border: 0px;
+	background-color: rgba(0, 0, 0, 0);
+	margin: 0px;
+}
+
+.red{
+	border: 1px solid #F79797;
+	background-color: #F5BABA;
+	margin-top:15px;
+}
+.green{
+	border: 1px solid #77A66D;
+	background-color: #B5DBAD;
+	margin-top:15px;
+}
+
+.space{
+}
+
+.answer{
+	margin: 12px;
+	padding: 5px;
+	background-color: #E8E8E8;
+	border: 1px solid #DBDBDB;
+}
+
+.small-button{
+	font-size: 10px;
 }
 
 button{
@@ -61,41 +102,60 @@ margin-top: 5px;
 <script>
 $(function(){ 
 
-	function appendNextButton(div){
-		var button = $("<button>Next</button>");
+function appendNextButton(div){
+	var button = $("<button>Next</button>");
+	button.button();
+	button.click(nextHandler);
+	div.append(button);
+}
+function appendPrevButton(div){
+	var button = $("<button>Prev</button>");
+	button.button();
+	button.click(prevHandler);
+	div.append(button);
+}
+function appendSubmitButton(div){
+	var button = $("<button>Submit</button>");
+	button.button();
+	button.click(submitHandler);
+	div.append(button);
+}
+function appendNumberNav(outerDiv){
+	var div = $("<div style='float:right; margin-top:10px'></div>");
+	var buttons = [["Sample Question", -2]];
+	for (var i = 0; i < jqueryDivs.length; i++){
+		buttons.push([i + 1, i]);
+	}
+	buttons.push(["Submit", jqueryDivs.length]);
+	for (var i = 0; i < buttons.length; i++){
+		var button = $("<button class='small-button'>" + buttons[i][0] + "</button>");
 		button.button();
-		button.click(nextHandler);
+		(function(){
+			var targetNum = buttons[i][1];
+			button.click(function(){numHandler(targetNum);});
+		})();
 		div.append(button);
 	}
-	function appendPrevButton(div){
-		var button = $("<button>Prev</button>");
-		button.button();
-		button.click(prevHandler);
-		div.append(button);
-	}
-	function appendSubmitButton(div){
-		var button = $("<button>Submit</button>");
-		button.button();
-		button.click(submitHandler);
-		div.append(button);
-	}
+	outerDiv.append(div);
+}
 
-	function shuffle(a) {
-		var j, x, i;
-		for (i = a.length; i; i--) {
-			j = Math.floor(Math.random() * i);
-			x = a[i - 1];
-			a[i - 1] = a[j];
-			a[j] = x;
-		}
+function shuffle(a) {
+	var j, x, i;
+	for (i = a.length; i; i--) {
+		j = Math.floor(Math.random() * i);
+		x = a[i - 1];
+		a[i - 1] = a[j];
+		a[j] = x;
 	}
+}
 
-	var lastActionTime = (new Date()).getTime();
-	var lastClicked = false;
-	var times = [];
-	var clickedLink = [];
-var currentRandomizableIndex = -1; // -1 corresponds to the programmer question
+var lastActionTime = (new Date()).getTime();
+var lastClicked = false;
+var times = [];
+var clickedLink = [];
+var currentRandomizableIndex = -4; // -3 for consent, -2 for programmer no programmer, -1 for directions
 var isProgrammer = false;
+var timeOnTutorial = 0;
 
 var randomizeable_question_divs = $(".randomizeable");
 shuffle(randomizeable_question_divs);
@@ -113,6 +173,10 @@ for (var i = 0; i < randomizeable_question_divs.length; i++){
 		urlDiv.append(link);
 		question.append(urlDiv);
 	}
+
+	// now put the number there in the text
+	var title = question.find(".table_title");
+	title.html((i+1) +": " + title.html());
 
 		    // now make the directions
 		    var directions_text = $("#directions").html();
@@ -137,6 +201,10 @@ for (var i = 0; i < randomizeable_question_divs.length; i++){
 			questionChangeHandler();
 			loadNewQuestion(currentRandomizableIndex - 1);
 		}
+		function numHandler(n){
+			questionChangeHandler();
+			loadNewQuestion(n);
+		}
 		function submitHandler(){
 			questionChangeHandler();
 		    // do the submit stuff
@@ -157,6 +225,7 @@ for (var i = 0; i < randomizeable_question_divs.length; i++){
 		    }
 		    msg.entities = entities;
 		    msg.programmer = isProgrammer;
+		    msg.tutorialTime = timeOnTutorial;
 		    console.log("msg", msg);
 		    $.ajax({
 		    	type: "POST",
@@ -167,8 +236,10 @@ for (var i = 0; i < randomizeable_question_divs.length; i++){
 		    		$("#current_question_content").html("All done!  Thank you so much for your help!");
 		    	}
 		    });
-		    
+
 		}
+
+		var firstTutorial = true;
 
 		function loadNewQuestion(index){
 
@@ -176,12 +247,12 @@ for (var i = 0; i < randomizeable_question_divs.length; i++){
 			var question_div = $("#current_question");
 			var navigation_div = $("#navigation");
 
-			if (index === -1){
+			if (index === -4){
 				navigation_div.html("");
 				appendNextButton(navigation_div);
 				question_div.html("Consent stuff.");
 			}
-			if (index === -2){
+			if (index === -3){
 		    // put the question about programmer, not programmer back in
 		    navigation_div.html("");
 		    appendNextButton(navigation_div);
@@ -209,16 +280,30 @@ for (var i = 0; i < randomizeable_question_divs.length; i++){
 		    });
 		    return;
 		}
-		if (index === -3){
+		if (index === -2){
 			navigation_div.html("");
+			appendPrevButton(navigation_div);
 			appendNextButton(navigation_div);
-			question_div.html($("#tutorial").html());
+			if (!firstTutorial){
+				appendNumberNav(navigation_div);
+			}
+			firstTutorial = false;
+			question_div.html($("#tutorial-1").html());
+			return;
+		}
+		if (index === -1){
+			navigation_div.html("");
+			appendPrevButton(navigation_div);
+			appendNextButton(navigation_div);
+			question_div.html($("#tutorial-2").html());
+			return;
 		}
 
 		if (index >= jqueryDivs.length){
 			navigation_div.html("");
 			appendPrevButton(navigation_div);
 			appendSubmitButton(navigation_div);
+			appendNumberNav(navigation_div);
 			question_div.html("Ready to submit?");
 			$("#explanation").css("display", "none");
 			return;
@@ -226,7 +311,6 @@ for (var i = 0; i < randomizeable_question_divs.length; i++){
 
 		// otherwise we're in one of the table questions, so handle that
 
-		
 		question_div.html(jqueryDivs[currentRandomizableIndex]);
 		var link = question_div.find("a");
 		link.click(function(){console.log("clicked link"); lastClicked = true;});
@@ -266,6 +350,7 @@ for (var i = 0; i < randomizeable_question_divs.length; i++){
 		if (index < jqueryDivs.length){
 			appendNextButton(navigation_div);
 		}
+		appendNumberNav(navigation_div);
 	}
 
 	function questionChangeHandler(){
@@ -275,6 +360,11 @@ for (var i = 0; i < randomizeable_question_divs.length; i++){
 
 		var lastUrlClicked = lastClicked;
 		lastClicked = false;
+
+		if (currentRandomizableIndex === -2){
+			// tutorial page
+			timeOnTutorial += passedTime;
+		}
 
 		if (currentRandomizableIndex >= 0 && currentRandomizableIndex < randomizeable_question_divs.length){
 			times[currentRandomizableIndex] += passedTime;
@@ -302,53 +392,186 @@ Finding Duplicate Data Survey
   <div id="navigation"></div>
   </div>
 
-  <div id="explanation-1", class="explanation">
-	<div class="table_title">Example</div>
+
+
+
+<div id="hidden" style="display:none">
+
+  <div id="tutorial-1", class="explanation">
+	<div class="table_title">Sample Question</div>
+	<div class="small">
 
 	<div class="example_title">The situation:</div>
-	You have a table of friends' names, ages, birthdays, and phone numbers.  Unfortunately, many friends appear in the table multiple times because the information has been collected several times.  You want a table that only lists each friend once, so you need to combine all the rows that refer to the same friend.  The goal is to collapse all the rows that refer to a single friend without collapsing rows that refer to different friends.
-	<br>
-	You're going to be picking a set of columns from the table.  If two rows have the same values in all of your selected columns, we'll merge the rows.  If they don't, we'll assume they refer to two different people.  You'll need to use your knowledge of what attributes tend to be unique about your friends.  You'll also need to use your knowledge of what attributes tend to stay the same over time.
+	You have a table of friends' names, ages, birthdays, phone numbers, and addresses.  Unfortunately, many friends appear in the table multiple times because the information has been collected several times.  You want a table that only lists each friend once, so you need to combine all the rows that refer to the same friend.  The goal is to collapse all the rows that refer to a single friend without collapsing rows that refer to different friends.
+	<br><br>
+	You're going to be picking a set of columns from the table.  If two rows have the same values in all of your selected columns, we'll merge the rows.  If they don't, we'll assume they refer to two different people.  You'll need to use your knowledge of what attributes tend to be unique about your friends.  You'll also need to know what attributes tend to stay the same over time.
 
 	<div class="example_title">The data:</div>
 	In this snippet of the table, the first two rows are from the same Alice at different points in time.  Her birthday and phone number are the same, but she was 37 for one of the rows and 38 for another.  The third and fourth rows refer to two different friends, both named Bob.
 	<table>
-	  <tr><td>name</td><td>age</td><td>birthday</td><td>phone_number</td></tr>
-	  <tr><td>Alice</td><td>37</td><td>Feb 2, 1979</td><td>555-555-5555</td></tr>
-	  <tr><td>Alice</td><td>38</td><td>Feb 2, 1979</td><td>555-555-5555</td></tr>
-	  <tr><td>Bob</td><td>37</td><td>Jan 1, 1979</td><td>777-777-7777</td></tr>
-	  <tr><td>Bob</td><td>38</td><td>May 20, 1979</td><td>999-999-9999</td></tr>
+	  <tr><td>name</td><td>age</td><td>birthday</td><td>phone_number</td><td>address</td></tr>
+	  <tr><td>Alice</td><td>37</td><td>Feb 2, 1979</td><td>555-555-5555</td><td>1234 Lane Street</td></tr>
+	  <tr><td>Alice</td><td>38</td><td>Feb 2, 1979</td><td>555-555-5555</td><td></td></tr>
+	  <tr><td>Bob</td><td>37</td><td>Jan 1, 1979</td><td>777-777-7777</td><td></td></tr>
+	  <tr><td>Bob</td><td>38</td><td>May 20, 1979</td><td>999-999-9999</td><td>9876 Drive Run</td></tr>
 	</table>
 
-	<div class="example_title">Some bad solutions:</div>
-	<span class="selection">NAME</span>:
+
+	<div class="red">
+	<center><div class="example_title">Some bad solutions</div></center>
+
+	<div class="answer">
+	<div class="space"><span class="selection">NAME</span>:</div>
+	<div>
+		<table class="invisible"><tr class="invisible">
+		<td class="invisible"><img src="name.png" style="height: 80px"> </td>
+		<td class="invisible"><table>
+		  <tr><td>name</td><td>age</td><td>birthday</td><td>phone_number</td><td>address</td></tr>
+		  <tr style="background-color: #CFDFEF"><td>Alice</td><td>37</td><td>Feb 2, 1979</td><td>555-555-5555</td><td>1234 Lane Street</td></tr>
+		  <tr style="background-color: #CFDFEF"><td>Alice</td><td>38</td><td>Feb 2, 1979</td><td>555-555-5555</td><td></td></tr>
+		  <tr style="background-color: #EFDFCF"><td>Bob</td><td>37</td><td>Jan 1, 1979</td><td>777-777-7777</td><td></td></tr>
+		  <tr style="background-color: #EFCFEF"><td>Bob</td><td>38</td><td>May 20, 1979</td><td>999-999-9999</td><td>9876 Drive Run</td></tr>
+		</table></td>
+		<td class="invisible">&rarr;</td>
+		<td class="invisible"><table>
+		  <tr><td>name</td><td>age</td><td>birthday</td><td>phone_number</td><td>address</td></tr>
+		  <tr style="background-color: #CFDFEF"><td>Alice</td><td>37</td><td>Feb 2, 1979</td><td>555-555-5555</td><td>1234 Lane Street</td></tr>
+		  <tr style="background-color: #EFDFCF"><td>Bob</td><td>37</td><td>Jan 1, 1979</td><td>777-777-7777</td><td></td></tr>
+		</table></td>
+		</tr></table>
+	</div>
 	Just selecting <span class="selection">NAME</span> doesn't work because although we successfully collapse the two Alice rows that refer to a single friend, we also collapse the two Bobs, even though they're different friends.
-	<br>
+	<br><br>
 	The bad outcome: we got rid of a Bob!
-	<span class="selection">NAME AND AGE</span>:
+	</div>
+
+	<div class="answer">
+	<div class="space"><span class="selection">NAME AND AGE</span>:</div>
+	<div>
+		<table class="invisible"><tr class="invisible">
+		<td class="invisible"><img src="name_age.png" style="height: 80px"> </td>
+		<td class="invisible"><table>
+		  <tr><td>name</td><td>age</td><td>birthday</td><td>phone_number</td><td>address</td></tr>
+		  <tr style="background-color: #CFDFEF"><td>Alice</td><td>37</td><td>Feb 2, 1979</td><td>555-555-5555</td><td>1234 Lane Street</td></tr>
+		  <tr style="background-color: #CFDFEF"><td>Alice</td><td>38</td><td>Feb 2, 1979</td><td>555-555-5555</td><td></td></tr>
+		  <tr style="background-color: #EFDFCF"><td>Bob</td><td>37</td><td>Jan 1, 1979</td><td>777-777-7777</td><td></td></tr>
+		  <tr style="background-color: #EFCFEF"><td>Bob</td><td>38</td><td>May 20, 1979</td><td>999-999-9999</td><td>9876 Drive Run</td></tr>
+		</table></td>
+		<td class="invisible">&rarr;</td>
+		<td class="invisible"><table>
+		  <tr><td>name</td><td>age</td><td>birthday</td><td>phone_number</td><td>address</td></tr>
+		  <tr style="background-color: #CFDFEF"><td>Alice</td><td>37</td><td>Feb 2, 1979</td><td>555-555-5555</td><td>1234 Lane Street</td></tr>
+		  <tr style="background-color: #CFDFEF"><td>Alice</td><td>38</td><td>Feb 2, 1979</td><td>555-555-5555</td><td></td></tr>
+		  <tr style="background-color: #EFDFCF"><td>Bob</td><td>37</td><td>Jan 1, 1979</td><td>777-777-7777</td><td></td></tr>
+		  <tr style="background-color: #EFCFEF"><td>Bob</td><td>38</td><td>May 20, 1979</td><td>999-999-9999</td><td>9876 Drive Run</td></tr>
+		</table></td>
+		</tr></table>
+	</div>
+
 	Selecting <span class="selection">NAME AND AGE</span> doesn't work because even though we now distinguish between between the two Bobs, we also distinguish between the two Alice rows, even though they refer to the same friend.
-	<br>
+	<br><br>
 	The bad outcome: we kept a fake Alice!
+	</div>
 
-	<div class="example_title">Some good solutions:</div>
+	<div class="answer">
+	<div class="space"><span class="selection">ADDRESS</span>:</div>
+	<div>
+		<table class="invisible"><tr class="invisible">
+		<td class="invisible"><img src="address.png" style="height: 80px"> </td>
+		<td class="invisible"><table>
+		  <tr><td>name</td><td>age</td><td>birthday</td><td>phone_number</td><td>address</td></tr>
+		  <tr style="background-color: #CFDFEF"><td>Alice</td><td>37</td><td>Feb 2, 1979</td><td>555-555-5555</td><td>1234 Lane Street</td></tr>
+		  <tr style="background-color: #CFDFEF"><td>Alice</td><td>38</td><td>Feb 2, 1979</td><td>555-555-5555</td><td></td></tr>
+		  <tr style="background-color: #EFDFCF"><td>Bob</td><td>37</td><td>Jan 1, 1979</td><td>777-777-7777</td><td></td></tr>
+		  <tr style="background-color: #EFCFEF"><td>Bob</td><td>38</td><td>May 20, 1979</td><td>999-999-9999</td><td>9876 Drive Run</td></tr>
+		</table></td>
+		<td class="invisible">&rarr;</td>
+		<td class="invisible"><table>
+		  <tr><td>name</td><td>age</td><td>birthday</td><td>phone_number</td><td>address</td></tr>
+		  <tr style="background-color: #CFDFEF"><td>Alice</td><td>37</td><td>Feb 2, 1979</td><td>555-555-5555</td><td>1234 Lane Street</td></tr>
+		  <tr style="background-color: #CFDFEF"><td>Alice</td><td>38</td><td>Feb 2, 1979</td><td>555-555-5555</td><td></td></tr>
+		  <tr style="background-color: #EFCFEF"><td>Bob</td><td>38</td><td>May 20, 1979</td><td>999-999-9999</td><td>9876 Drive Run</td></tr>
+		</table></td>
+		</tr></table>
+	</div>
+	Selecting <span class="selection">ADDRESS</span> doesn't work because even though you know your friends all have different addresses, some rows don't include addresses.
+	<br><br>
+	The bad outcome: we merged a Bob into an Alice row!
+	</div>
+	</div>
+
+	<div class="green">
+	<center><div class="example_title">Some good solutions</div></center>
 		
-	<span class="selection">PHONE_NUMBER</span>:
-	<img src="ex1.png" height=80px>
-	You know none of your friends share a phone number, so if you see a second row with a particular phone number, you know it refers to the same friend as the first row with that phone number.  You merge the Alice rows and keep both Bobs!
+
+	<div class="answer">
+	<div class="space"><span class="selection">PHONE_NUMBER</span>:</div>
+	<div>
+		<table class="invisible"><tr class="invisible">
+		<td class="invisible"><img src="phone_number.png" style="height: 80px"> </td>
+		<td class="invisible"><table>
+		  <tr><td>name</td><td>age</td><td>birthday</td><td>phone_number</td><td>address</td></tr>
+		  <tr style="background-color: #CFDFEF"><td>Alice</td><td>37</td><td>Feb 2, 1979</td><td>555-555-5555</td><td>1234 Lane Street</td></tr>
+		  <tr style="background-color: #CFDFEF"><td>Alice</td><td>38</td><td>Feb 2, 1979</td><td>555-555-5555</td><td></td></tr>
+		  <tr style="background-color: #EFDFCF"><td>Bob</td><td>37</td><td>Jan 1, 1979</td><td>777-777-7777</td><td></td></tr>
+		  <tr style="background-color: #EFCFEF"><td>Bob</td><td>38</td><td>May 20, 1979</td><td>999-999-9999</td><td>9876 Drive Run</td></tr>
+		</table></td>
+		<td class="invisible">&rarr;</td>
+		<td class="invisible"><table>
+		  <tr><td>name</td><td>age</td><td>birthday</td><td>phone_number</td><td>address</td></tr>
+		  <tr style="background-color: #CFDFEF"><td>Alice</td><td>37</td><td>Feb 2, 1979</td><td>555-555-5555</td><td>1234 Lane Street</td></tr>
+		  <tr style="background-color: #EFDFCF"><td>Bob</td><td>37</td><td>Jan 1, 1979</td><td>777-777-7777</td><td></td></tr>
+		  <tr style="background-color: #EFCFEF"><td>Bob</td><td>38</td><td>May 20, 1979</td><td>999-999-9999</td><td>9876 Drive Run</td></tr>
+		</table></td>
+		</tr></table>
+	</div>
+	You know all the rows include the phone number and you know none of your friends share a phone number, so if you see a second row with a particular phone number, you know it refers to the same friend as the first row.  You merge the Alice rows and keep both Bobs!
 	<br>
+	</div>
 
-	<span class="selection">NAME AND BIRTHDAY</span>:
-	<img src="ex2.png" height=80px>
+
+	<div class="answer">
+	<div class="space"><span class="selection">NAME AND BIRTHDAY</span>:</div>
+	<div>
+		<table class="invisible"><tr class="invisible">
+		<td class="invisible"><img src="name_birthday.png" style="height: 80px"> </td>
+		<td class="invisible"><table>
+		  <tr><td>name</td><td>age</td><td>birthday</td><td>phone_number</td><td>address</td></tr>
+		  <tr style="background-color: #CFDFEF"><td>Alice</td><td>37</td><td>Feb 2, 1979</td><td>555-555-5555</td><td>1234 Lane Street</td></tr>
+		  <tr style="background-color: #CFDFEF"><td>Alice</td><td>38</td><td>Feb 2, 1979</td><td>555-555-5555</td><td></td></tr>
+		  <tr style="background-color: #EFDFCF"><td>Bob</td><td>37</td><td>Jan 1, 1979</td><td>777-777-7777</td><td></td></tr>
+		  <tr style="background-color: #EFCFEF"><td>Bob</td><td>38</td><td>May 20, 1979</td><td>999-999-9999</td><td>9876 Drive Run</td></tr>
+		</table></td>
+		<td class="invisible">&rarr;</td>
+		<td class="invisible"><table>
+		  <tr><td>name</td><td>age</td><td>birthday</td><td>phone_number</td><td>address</td></tr>
+		  <tr style="background-color: #CFDFEF"><td>Alice</td><td>37</td><td>Feb 2, 1979</td><td>555-555-5555</td><td>1234 Lane Street</td></tr>
+		  <tr style="background-color: #EFDFCF"><td>Bob</td><td>37</td><td>Jan 1, 1979</td><td>777-777-7777</td><td></td></tr>
+		  <tr style="background-color: #EFCFEF"><td>Bob</td><td>38</td><td>May 20, 1979</td><td>999-999-9999</td><td>9876 Drive Run</td></tr>
+		</table></td>
+		</tr></table>
+	</div>
 	Alternatively, you know the Bobs have the same name, but not the same birthday, so you select the checkboxes for name and birthday.  Even though Alice is in the table multiple times, her birthday won't change, so you merge the Alice rows and keep both Bobs!
+	</div>
+	</div>
+	</div>
   </div>
 
 
-  <div id="explanation-2", class="explanation">
+  <div id="tutorial-2", class="explanation">
+	<div class="table_title">Directions</div>
+	<div class="small">
   	For the rest of this survey, you'll be completing this same task, but not for friends -- instead you'll be completing the task for eight different entities.  You'll only see the first row of the table, so you'll need to think about what attributes are unique about the rows and what attributes will stay the same over time.
+
+  	<br><br>
+
+  	Feel free to use the "Prev" button to get back to the tutorial at any time, or to go back to edit your answers.
+
+  	<br><br>
+
+  	Oh, and don't use your browser's back button -- all your answers would be lost.  :(
+  	</div>
   </div>
-
-
-<div id="hidden" style="display:none">
 
 <div id="programmer_question">
   <div>
@@ -422,9 +645,9 @@ Finding Duplicate Data Survey
 
 Example Table
 <table>
-  <tr><td><input type="checkbox"></td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><input type="checkbox"></td></tr>
-  <tr><td>name text</td><td>age text</td><td>birthday text</td><td>phone_number text</td></tr>
-  <tr><td>Alice</td><td>38</td><td>Feb 2, 1979</td><td>555-555-5555</td></tr>
+  <tr><td><input type="checkbox"></td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><input type="checkbox"></td></tr>
+  <tr><td>name</td><td>age</td><td>birthday</td><td>phone_number</td><td>address</td></tr>
+  <tr><td>Alice</td><td>38</td><td>Feb 2, 1979</td><td>555-555-5555</td><td>1234 Lane Street</td></tr>
 </table>
 
 <div id="directions">

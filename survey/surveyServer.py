@@ -50,6 +50,7 @@ class StoreHandler(BaseHTTPRequestHandler):
                         decoded = json.loads(urllib.unquote(data).decode('utf8'))
                         entitiesArray =  decoded["entities"]
                         isProgrammer = decoded["programmer"]
+                        tutorialTime = decoded["tutorialTime"]
 
                         userId = time.time() # this server is single threaded, so this is ok
 
@@ -57,7 +58,7 @@ class StoreHandler(BaseHTTPRequestHandler):
                         entityData = pjoin(curdir, 'entityData.csv')
                         
                         pd = open(programmerData, "a")
-                        pd.write(str(userId) + "," +  str(isProgrammer) + "\n")
+                        pd.write(str(userId) + "," +  str(isProgrammer) + "," + str(tutorialTime) + "\n")
                         pd.close()
 
                         ed = open(entityData, "a")
