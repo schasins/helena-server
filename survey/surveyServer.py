@@ -2,6 +2,8 @@ from os import curdir
 from os.path import join as pjoin
 
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
+from SocketServer import ThreadingMixIn
+import threading
 
 import json
 import urlparse
@@ -10,7 +12,11 @@ import cgi
 import urllib
 import time
 
-class StoreHandler(BaseHTTPRequestHandler):
+class Handler(BaseHTTPRequestHandler):
+
+        def setup(self):
+                BaseHTTPRequestHandler.setup(self)
+                self.request.settimeout(20)
 
 	#Handler for the GET requests
 	def do_GET(self):
@@ -76,8 +82,13 @@ class StoreHandler(BaseHTTPRequestHandler):
 			self.send_response(200)
 
 
-server = HTTPServer(('', 8081), StoreHandler)
-server.serve_forever()
+class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
+    """Handle requests in a separate thread."""
+
+if __name__ == '__main__':
+    server = ThreadedHTTPServer(('', 8081), Handler)
+    print 'Starting server, use <Ctrl-C> to stop'
+    server.serve_forever()
 
 
 
