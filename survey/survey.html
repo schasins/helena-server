@@ -404,103 +404,19 @@ Finding Duplicate Data Survey
 	<div class="small">
 
 	<div class="example_title">The situation:</div>
-	You have a table of friends' names, ages, birthdays, phone numbers, and addresses.  Unfortunately, many friends appear in the table multiple times because the information has been collected several times.  You want a table that only lists each friend once, so you need to combine all the rows that refer to the same friend.  The goal is to collapse all the rows that refer to a single friend without collapsing rows that refer to different friends.
+	You have a table of friends' names, ages, birthdays, phone numbers, and addresses.  Unfortunately, you have collected this information several times as friends' information has changed over the years, so many friends have multiple rows in the table.  You want a table that only lists each friend once, so you need to combine all the rows that refer to the same friend.
 	<br><br>
-	You're going to be picking a set of columns from the table.  If two rows have the same values in all of your selected columns, we'll merge the rows.  If they don't, we'll assume they refer to two different people.  You'll need to use your knowledge of what attributes tend to be unique about your friends.  You'll also need to know what attributes tend to stay the same over time.
+	The goal is to find duplicates -- rows that refer to the same friend.  You're going to do this by picking a set of important columns from the table.  We'll use these columns to identify duplicates.  If two rows have the same values in all of the selected columns, we'll merge the rows.  If they don't, we'll assume they refer to two different people.   When we merge two rows, it's ok to lose information from one of the merged rows -- we just want to make sure we have exactly one row per friend.  You'll need to use your knowledge of what attributes tend to be unique about your friends.  You'll also need to know what attributes tend to stay the same over time.
 
 	<div class="example_title">The data:</div>
-	In this snippet of the table, the first two rows are from the same Alice at different points in time.  Her birthday and phone number are the same, but she was 37 for one of the rows and 38 for another.  The third and fourth rows refer to two different friends, both named Bob.
+	In this snippet of the table, the first two rows are from the same Alice at different points in time.  Her birthday and phone number are the same, but she was 37 for one of the rows and 38 for another.  The third and fourth rows refer to two different friends, both named Bob.  We use a color to represent each friend -- blue for Alice, orange for the first Bob, purple for the second Bob.
 	<table>
 	  <tr><td>name</td><td>age</td><td>birthday</td><td>phone_number</td><td>address</td></tr>
-	  <tr><td>Alice</td><td>37</td><td>Feb 2, 1979</td><td>555-555-5555</td><td>1234 Lane Street</td></tr>
-	  <tr><td>Alice</td><td>38</td><td>Feb 2, 1979</td><td>555-555-5555</td><td></td></tr>
-	  <tr><td>Bob</td><td>37</td><td>Jan 1, 1979</td><td>777-777-7777</td><td></td></tr>
-	  <tr><td>Bob</td><td>38</td><td>May 20, 1979</td><td>999-999-9999</td><td>9876 Drive Run</td></tr>
+	  <tr style="background-color: #CFDFEF"><td>Alice</td><td>37</td><td>Feb 2, 1979</td><td>555-555-5555</td><td>1234 Lane Street</td></tr>
+	  <tr style="background-color: #CFDFEF"><td>Alice</td><td>38</td><td>Feb 2, 1979</td><td>555-555-5555</td><td></td></tr>
+	  <tr style="background-color: #EFDFCF"><td>Bob</td><td>37</td><td>Jan 1, 1979</td><td>777-777-7777</td><td></td></tr>
+	  <tr style="background-color: #EFCFEF"><td>Bob</td><td>38</td><td>May 20, 1979</td><td>999-999-9999</td><td>9876 Drive Run</td></tr>
 	</table>
-
-
-	<div class="red">
-	<center><div class="example_title">Some bad solutions</div></center>
-
-	<div class="answer">
-	<div class="space"><span class="selection">NAME</span>:</div>
-	<div>
-		<table class="invisible"><tr class="invisible">
-		<td class="invisible"><img src="name.png" style="height: 80px"> </td>
-		<td class="invisible"><table>
-		  <tr><td>name</td><td>age</td><td>birthday</td><td>phone_number</td><td>address</td></tr>
-		  <tr style="background-color: #CFDFEF"><td>Alice</td><td>37</td><td>Feb 2, 1979</td><td>555-555-5555</td><td>1234 Lane Street</td></tr>
-		  <tr style="background-color: #CFDFEF"><td>Alice</td><td>38</td><td>Feb 2, 1979</td><td>555-555-5555</td><td></td></tr>
-		  <tr style="background-color: #EFDFCF"><td>Bob</td><td>37</td><td>Jan 1, 1979</td><td>777-777-7777</td><td></td></tr>
-		  <tr style="background-color: #EFCFEF"><td>Bob</td><td>38</td><td>May 20, 1979</td><td>999-999-9999</td><td>9876 Drive Run</td></tr>
-		</table></td>
-		<td class="invisible">&rarr;</td>
-		<td class="invisible"><table>
-		  <tr><td>name</td><td>age</td><td>birthday</td><td>phone_number</td><td>address</td></tr>
-		  <tr style="background-color: #CFDFEF"><td>Alice</td><td>37</td><td>Feb 2, 1979</td><td>555-555-5555</td><td>1234 Lane Street</td></tr>
-		  <tr style="background-color: #EFDFCF"><td>Bob</td><td>37</td><td>Jan 1, 1979</td><td>777-777-7777</td><td></td></tr>
-		</table></td>
-		</tr></table>
-	</div>
-	Just selecting <span class="selection">NAME</span> doesn't work because although we successfully collapse the two Alice rows that refer to a single friend, we also collapse the two Bobs, even though they're different friends.
-	<br><br>
-	The bad outcome: we got rid of a Bob!
-	</div>
-
-	<div class="answer">
-	<div class="space"><span class="selection">NAME AND AGE</span>:</div>
-	<div>
-		<table class="invisible"><tr class="invisible">
-		<td class="invisible"><img src="name_age.png" style="height: 80px"> </td>
-		<td class="invisible"><table>
-		  <tr><td>name</td><td>age</td><td>birthday</td><td>phone_number</td><td>address</td></tr>
-		  <tr style="background-color: #CFDFEF"><td>Alice</td><td>37</td><td>Feb 2, 1979</td><td>555-555-5555</td><td>1234 Lane Street</td></tr>
-		  <tr style="background-color: #CFDFEF"><td>Alice</td><td>38</td><td>Feb 2, 1979</td><td>555-555-5555</td><td></td></tr>
-		  <tr style="background-color: #EFDFCF"><td>Bob</td><td>37</td><td>Jan 1, 1979</td><td>777-777-7777</td><td></td></tr>
-		  <tr style="background-color: #EFCFEF"><td>Bob</td><td>38</td><td>May 20, 1979</td><td>999-999-9999</td><td>9876 Drive Run</td></tr>
-		</table></td>
-		<td class="invisible">&rarr;</td>
-		<td class="invisible"><table>
-		  <tr><td>name</td><td>age</td><td>birthday</td><td>phone_number</td><td>address</td></tr>
-		  <tr style="background-color: #CFDFEF"><td>Alice</td><td>37</td><td>Feb 2, 1979</td><td>555-555-5555</td><td>1234 Lane Street</td></tr>
-		  <tr style="background-color: #CFDFEF"><td>Alice</td><td>38</td><td>Feb 2, 1979</td><td>555-555-5555</td><td></td></tr>
-		  <tr style="background-color: #EFDFCF"><td>Bob</td><td>37</td><td>Jan 1, 1979</td><td>777-777-7777</td><td></td></tr>
-		  <tr style="background-color: #EFCFEF"><td>Bob</td><td>38</td><td>May 20, 1979</td><td>999-999-9999</td><td>9876 Drive Run</td></tr>
-		</table></td>
-		</tr></table>
-	</div>
-
-	Selecting <span class="selection">NAME AND AGE</span> doesn't work because even though we now distinguish between between the two Bobs, we also distinguish between the two Alice rows, even though they refer to the same friend.
-	<br><br>
-	The bad outcome: we kept a fake Alice!
-	</div>
-
-	<div class="answer">
-	<div class="space"><span class="selection">ADDRESS</span>:</div>
-	<div>
-		<table class="invisible"><tr class="invisible">
-		<td class="invisible"><img src="address.png" style="height: 80px"> </td>
-		<td class="invisible"><table>
-		  <tr><td>name</td><td>age</td><td>birthday</td><td>phone_number</td><td>address</td></tr>
-		  <tr style="background-color: #CFDFEF"><td>Alice</td><td>37</td><td>Feb 2, 1979</td><td>555-555-5555</td><td>1234 Lane Street</td></tr>
-		  <tr style="background-color: #CFDFEF"><td>Alice</td><td>38</td><td>Feb 2, 1979</td><td>555-555-5555</td><td></td></tr>
-		  <tr style="background-color: #EFDFCF"><td>Bob</td><td>37</td><td>Jan 1, 1979</td><td>777-777-7777</td><td></td></tr>
-		  <tr style="background-color: #EFCFEF"><td>Bob</td><td>38</td><td>May 20, 1979</td><td>999-999-9999</td><td>9876 Drive Run</td></tr>
-		</table></td>
-		<td class="invisible">&rarr;</td>
-		<td class="invisible"><table>
-		  <tr><td>name</td><td>age</td><td>birthday</td><td>phone_number</td><td>address</td></tr>
-		  <tr style="background-color: #CFDFEF"><td>Alice</td><td>37</td><td>Feb 2, 1979</td><td>555-555-5555</td><td>1234 Lane Street</td></tr>
-		  <tr style="background-color: #CFDFEF"><td>Alice</td><td>38</td><td>Feb 2, 1979</td><td>555-555-5555</td><td></td></tr>
-		  <tr style="background-color: #EFCFEF"><td>Bob</td><td>38</td><td>May 20, 1979</td><td>999-999-9999</td><td>9876 Drive Run</td></tr>
-		</table></td>
-		</tr></table>
-	</div>
-	Selecting <span class="selection">ADDRESS</span> doesn't work because even though you know your friends all have different addresses, some rows don't include addresses.
-	<br><br>
-	The bad outcome: we merged a Bob into an Alice row!
-	</div>
-	</div>
 
 	<div class="green">
 	<center><div class="example_title">Some good solutions</div></center>
@@ -527,7 +443,7 @@ Finding Duplicate Data Survey
 		</table></td>
 		</tr></table>
 	</div>
-	You know all the rows include the phone number and you know none of your friends share a phone number, so if you see a second row with a particular phone number, you know it refers to the same friend as the first row.  You merge the Alice rows and keep both Bobs!
+	You know all the rows include the phone number, and you know none of your friends share a phone number, so if you see a second row with a particular phone number, you know it refers to the same friend as the first row.  You also know none of your friends have changed phone numbers since you started collecting their information (so Alice won't have a different phone number in her second row).  You merge the Alice rows and keep both Bobs!
 	<br>
 	</div>
 
@@ -556,7 +472,93 @@ Finding Duplicate Data Survey
 	Alternatively, you know the Bobs have the same name, but not the same birthday, so you select the checkboxes for name and birthday.  Even though Alice is in the table multiple times, her birthday won't change, so you merge the Alice rows and keep both Bobs!
 	</div>
 	</div>
+
+
+	<div class="red">
+	<center><div class="example_title">Some bad solutions</div></center>
+
+	<div class="answer">
+	<div class="space"><span class="selection">NAME</span>:</div>
+	<div>
+		<table class="invisible"><tr class="invisible">
+		<td class="invisible"><img src="name.png" style="height: 80px"> </td>
+		<td class="invisible"><table>
+		  <tr><td>name</td><td>age</td><td>birthday</td><td>phone_number</td><td>address</td></tr>
+		  <tr style="background-color: #CFDFEF"><td>Alice</td><td>37</td><td>Feb 2, 1979</td><td>555-555-5555</td><td>1234 Lane Street</td></tr>
+		  <tr style="background-color: #CFDFEF"><td>Alice</td><td>38</td><td>Feb 2, 1979</td><td>555-555-5555</td><td></td></tr>
+		  <tr style="background-color: #EFDFCF"><td>Bob</td><td>37</td><td>Jan 1, 1979</td><td>777-777-7777</td><td></td></tr>
+		  <tr style="background-color: #EFCFEF"><td>Bob</td><td>38</td><td>May 20, 1979</td><td>999-999-9999</td><td>9876 Drive Run</td></tr>
+		</table></td>
+		<td class="invisible">&rarr;</td>
+		<td class="invisible"><table>
+		  <tr><td>name</td><td>age</td><td>birthday</td><td>phone_number</td><td>address</td></tr>
+		  <tr style="background-color: #CFDFEF"><td>Alice</td><td>37</td><td>Feb 2, 1979</td><td>555-555-5555</td><td>1234 Lane Street</td></tr>
+		  <tr style="background-color: #EFDFCF"><td>Bob</td><td>37</td><td>Jan 1, 1979</td><td>777-777-7777</td><td></td></tr>
+		</table></td>
+		</tr></table>
 	</div>
+	Just selecting <span class="selection">NAME</span> doesn't work because although we successfully merge the two Alice rows that refer to a single friend, we also merge the two Bobs, even though they're different friends.  Name doesn't work becuase a name can be shared by multiple friends.
+	<br><br>
+	The bad outcome: we got rid of a Bob!
+	</div>
+
+	<div class="answer">
+	<div class="space"><span class="selection">NAME AND AGE</span>:</div>
+	<div>
+		<table class="invisible"><tr class="invisible">
+		<td class="invisible"><img src="name_age.png" style="height: 80px"> </td>
+		<td class="invisible"><table>
+		  <tr><td>name</td><td>age</td><td>birthday</td><td>phone_number</td><td>address</td></tr>
+		  <tr style="background-color: #CFDFEF"><td>Alice</td><td>37</td><td>Feb 2, 1979</td><td>555-555-5555</td><td>1234 Lane Street</td></tr>
+		  <tr style="background-color: #CFDFEF"><td>Alice</td><td>38</td><td>Feb 2, 1979</td><td>555-555-5555</td><td></td></tr>
+		  <tr style="background-color: #EFDFCF"><td>Bob</td><td>37</td><td>Jan 1, 1979</td><td>777-777-7777</td><td></td></tr>
+		  <tr style="background-color: #EFCFEF"><td>Bob</td><td>38</td><td>May 20, 1979</td><td>999-999-9999</td><td>9876 Drive Run</td></tr>
+		</table></td>
+		<td class="invisible">&rarr;</td>
+		<td class="invisible"><table>
+		  <tr><td>name</td><td>age</td><td>birthday</td><td>phone_number</td><td>address</td></tr>
+		  <tr style="background-color: #CFDFEF"><td>Alice</td><td>37</td><td>Feb 2, 1979</td><td>555-555-5555</td><td>1234 Lane Street</td></tr>
+		  <tr style="background-color: #CFDFEF"><td>Alice</td><td>38</td><td>Feb 2, 1979</td><td>555-555-5555</td><td></td></tr>
+		  <tr style="background-color: #EFDFCF"><td>Bob</td><td>37</td><td>Jan 1, 1979</td><td>777-777-7777</td><td></td></tr>
+		  <tr style="background-color: #EFCFEF"><td>Bob</td><td>38</td><td>May 20, 1979</td><td>999-999-9999</td><td>9876 Drive Run</td></tr>
+		</table></td>
+		</tr></table>
+	</div>
+
+	Selecting <span class="selection">NAME AND AGE</span> doesn't work because even though we now distinguish between between the two Bobs, we also distinguish between the two Alice rows, even though they refer to the same friend.  Age changes over time, so this will prevent us from merging duplicates.
+	<br><br>
+	The bad outcome: we kept a fake Alice!
+	</div>
+
+	<div class="answer">
+	<div class="space"><span class="selection">ADDRESS</span>:</div>
+	<div>
+		<table class="invisible"><tr class="invisible">
+		<td class="invisible"><img src="address.png" style="height: 80px"> </td>
+		<td class="invisible"><table>
+		  <tr><td>name</td><td>age</td><td>birthday</td><td>phone_number</td><td>address</td></tr>
+		  <tr style="background-color: #CFDFEF"><td>Alice</td><td>37</td><td>Feb 2, 1979</td><td>555-555-5555</td><td>1234 Lane Street</td></tr>
+		  <tr style="background-color: #CFDFEF"><td>Alice</td><td>38</td><td>Feb 2, 1979</td><td>555-555-5555</td><td></td></tr>
+		  <tr style="background-color: #EFDFCF"><td>Bob</td><td>37</td><td>Jan 1, 1979</td><td>777-777-7777</td><td></td></tr>
+		  <tr style="background-color: #EFCFEF"><td>Bob</td><td>38</td><td>May 20, 1979</td><td>999-999-9999</td><td>9876 Drive Run</td></tr>
+		</table></td>
+		<td class="invisible">&rarr;</td>
+		<td class="invisible"><table>
+		  <tr><td>name</td><td>age</td><td>birthday</td><td>phone_number</td><td>address</td></tr>
+		  <tr style="background-color: #CFDFEF"><td>Alice</td><td>37</td><td>Feb 2, 1979</td><td>555-555-5555</td><td>1234 Lane Street</td></tr>
+		  <tr style="background-color: #CFDFEF"><td>Alice</td><td>38</td><td>Feb 2, 1979</td><td>555-555-5555</td><td></td></tr>
+		  <tr style="background-color: #EFCFEF"><td>Bob</td><td>38</td><td>May 20, 1979</td><td>999-999-9999</td><td>9876 Drive Run</td></tr>
+		</table></td>
+		</tr></table>
+	</div>
+	Selecting <span class="selection">ADDRESS</span> doesn't work because even though you know your friends all have different addresses, some rows don't include addresses -- in particular, one Bob row and one Alice row have the 'same' empty address, so they'll be merged.  Columns where some rows won't have data can end up making all the rows without data look like duplicates.
+	<br><br>
+	The bad outcome: we eliminated a Bob by merging a Bob row with an Alice row!
+	</div>
+	</div>
+	</div>
+
+	
   </div>
 
 
@@ -568,10 +570,6 @@ Finding Duplicate Data Survey
   	<br><br>
 
   	Feel free to use the "Prev" button (or the page-specific buttons) to get back to the tutorial at any time, or to go back to edit your answers.
-
-  	<br><br>
-
-  	Oh, and don't use your browser's back button -- all your answers would be lost.  :(
   	</div>
   </div>
 
