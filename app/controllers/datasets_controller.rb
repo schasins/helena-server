@@ -79,25 +79,52 @@ class DatasetsController < ApplicationController
   	dataset = Dataset.find(params[:id])
   	filename = gen_filename(dataset)
 
-  	cells = DatasetCell.includes(:dataset_value, :dataset_link).where({dataset_id: params[:id]}).order(row: :asc, col: :asc)
-  	rows = []
-  	currentRowIndex = -1;
+  	cells = DatasetCell.includes(:dataset_value, :dataset_link).where({dataset_id: params[:id]}).order(row: :asc, col: :asc, scraped_timestamp: :asc)
+  	laterCells = [] # this is a gross way to handle the fact that different passes through a dataset generate the same indexes, so just sorting by row and column isn't enough.  todo: do something better
+
+
+    rows = []
+    while (cells.length > 0)
+      #puts "starting while again"
+
+  	currentRowIndex = -1
+        currentColumnIndex = -1
+        currentTimestamp = -1
+        fullDatasetRowIndex = rows.length - 1
   	cells.each{ |cell|
+                # puts "row " +  cell.row.to_s + " col " + cell.col.to_s + " ri " + currentRowIndex.to_s + " ci " + currentColumnIndex.to_s + " fdri " + fullDatasetRowIndex.to_s + " created_at " + cell.created_at.to_s
+                if (cell.row == currentRowIndex && cell.col == currentColumnIndex)
+                  # ok, this is a repeat cell, must have gotten it in multiple passes
+                  # first let's check if it's even a different cell; if it was created at the same time, can just skip it forever
+                  # if not created at the same time, have to handle it later
+                  # not actually pleased with created_at as a way to handle this; todo:  look at values?  something else?; really just need a pass id on cells
+                  if (cell.scraped_timestamp != currentTimestamp)
+                    laterCells.push(cell)
+                  end
+                  next
+                end
   		if (cell.row != currentRowIndex)
   			currentRowIndex = cell.row
   			rows.push([])
+                        fullDatasetRowIndex += 1
   		end
+                currentColumnIndex = cell.col
+                currentTimestamp = cell.scraped_timestamp
+
       if (cell.scraped_attribute == Scraped::TEXT)
-        rows[currentRowIndex].push(cell.dataset_value.text)
+        rows[fullDatasetRowIndex].push(cell.dataset_value.text)
   		elsif (cell.scraped_attribute == Scraped::LINK)
-        rows[currentRowIndex].push(cell.dataset_link.link)
+        rows[fullDatasetRowIndex].push(cell.dataset_link.link)
       else
         # for now, default to putting the text in
-        rows[currentRowIndex].push(cell.dataset_value.text)
+        rows[fullDatasetRowIndex].push(cell.dataset_value.text)
       end
 
-      rows[currentRowIndex].push(cell.scraped_timestamp.to_i)
+      rows[fullDatasetRowIndex].push(cell.scraped_timestamp.to_i)
   	}
+      cells = laterCells
+      laterCells = []
+end
 
   	@rows = rows
 
