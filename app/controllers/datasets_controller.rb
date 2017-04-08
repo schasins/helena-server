@@ -79,13 +79,21 @@ class DatasetsController < ApplicationController
   	dataset = Dataset.find(params[:id])
   	filename = gen_filename(dataset)
 
-  	cells = DatasetCell.includes(:dataset_value, :dataset_link).where({dataset_id: params[:id]}).order(row: :asc, col: :asc, scraped_timestamp: :asc)
+  	cells = DatasetCell.includes(:dataset_value, :dataset_link).where({dataset_id: params[:id]}).order(row: :asc, col: :asc, created_at: :asc, scraped_timestamp: :asc)
   	laterCells = [] # this is a gross way to handle the fact that different passes through a dataset generate the same indexes, so just sorting by row and column isn't enough.  todo: do something better
 
 
     rows = []
+    removedCellsCount = 0
     while (cells.length > 0)
       #puts "starting while again"
+
+      if (cells[0].row != 0 || cells[0].col != 0)
+        puts "throwing away a cell because it's suppsoed to be the start of a fresh pass, but it's not at position 0,0"
+        puts cells[0]
+        cells = cells[1..-1]
+        next
+      end
 
   	currentRowIndex = -1
         currentColumnIndex = -1
@@ -98,20 +106,41 @@ class DatasetsController < ApplicationController
                   # first let's check if it's even a different cell; if it was created at the same time, can just skip it forever
                   # if not created at the same time, have to handle it later
                   # not actually pleased with created_at as a way to handle this; todo:  look at values?  something else?; really just need a pass id on cells
-                  if (cell.scraped_timestamp == prevCell.scraped_timestamp && cell.dataset_value_id == prevCell.dataset_value_id && cell.dataset_link_id == prevCell.dataset_link_id && cell.scraped_attribute == prevCell.scraped_attribute)
+                  if (cell.scraped_timestamp == prevCell.scraped_timestamp && cell.dataset_value_id == prevCell.dataset_value_id && cell.dataset_link_id == prevCell.dataset_link_id && cell.scraped_attribute == prevCell.scraped_attribute && cell.created_at == prevCell.created_at)
                     puts "removing cell for being a duplicate", cell
+                    removedCellsCount += 1
                   else
                     laterCells.push(cell)
                   end
                   next
                 end
+
+                if prevCell
+                  # also want to skip if there's an unreasonable gap between when cells created in a row.  all row cells are stored at same time (sent in same request).  shouldn't be 10 min gap
+                  if (cell.row == prevCell.row && (cell.created_at - prevCell.created_at).abs > 600)
+                    laterCells.push(cell)
+                    next
+                  end
+                  # todo: this is bad, but also want to skip if any gap is bigger than one day.  solves problem for now.  do better in future
+        
+                  if ((cell.created_at - prevCell.created_at).abs > 60 * 60 * 24)
+                    laterCells.push(cell)
+                    next
+                  end
+                end
+
+        
+                prevCell = cell
+
+        
+
   		if (cell.row != currentRowIndex)
   			currentRowIndex = cell.row
   			rows.push([])
                         fullDatasetRowIndex += 1
   		end
                 currentColumnIndex = cell.col
-                prevCell = cell
+
 
       if (cell.scraped_attribute == Scraped::TEXT)
         rows[fullDatasetRowIndex].push(cell.dataset_value.text)
@@ -127,6 +156,7 @@ class DatasetsController < ApplicationController
       cells = laterCells
       laterCells = []
 end
+    puts removedCellsCount
 
   	@rows = rows
 
