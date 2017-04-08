@@ -89,7 +89,7 @@ class DatasetsController < ApplicationController
 
   	currentRowIndex = -1
         currentColumnIndex = -1
-        currentTimestamp = -1
+        prevCell = nil
         fullDatasetRowIndex = rows.length - 1
   	cells.each{ |cell|
                 # puts "row " +  cell.row.to_s + " col " + cell.col.to_s + " ri " + currentRowIndex.to_s + " ci " + currentColumnIndex.to_s + " fdri " + fullDatasetRowIndex.to_s + " created_at " + cell.created_at.to_s
@@ -98,7 +98,9 @@ class DatasetsController < ApplicationController
                   # first let's check if it's even a different cell; if it was created at the same time, can just skip it forever
                   # if not created at the same time, have to handle it later
                   # not actually pleased with created_at as a way to handle this; todo:  look at values?  something else?; really just need a pass id on cells
-                  if (cell.scraped_timestamp != currentTimestamp)
+                  if (cell.scraped_timestamp == prevCell.scraped_timestamp && cell.dataset_value_id == prevCell.dataset_value_id && cell.dataset_link_id == prevCell.dataset_link_id && cell.scraped_attribute == prevCell.scraped_attribute)
+                    puts "removing cell for being a duplicate", cell
+                  else
                     laterCells.push(cell)
                   end
                   next
@@ -109,7 +111,7 @@ class DatasetsController < ApplicationController
                         fullDatasetRowIndex += 1
   		end
                 currentColumnIndex = cell.col
-                currentTimestamp = cell.scraped_timestamp
+                prevCell = cell
 
       if (cell.scraped_attribute == Scraped::TEXT)
         rows[fullDatasetRowIndex].push(cell.dataset_value.text)
