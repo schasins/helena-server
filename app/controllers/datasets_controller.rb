@@ -106,7 +106,7 @@ class DatasetsController < ApplicationController
                   # first let's check if it's even a different cell; if it was created at the same time, can just skip it forever
                   # if not created at the same time, have to handle it later
                   # not actually pleased with created_at as a way to handle this; todo:  look at values?  something else?; really just need a pass id on cells
-                  if (cell.scraped_timestamp == prevCell.scraped_timestamp && cell.dataset_value_id == prevCell.dataset_value_id && cell.dataset_link_id == prevCell.dataset_link_id && cell.scraped_attribute == prevCell.scraped_attribute && cell.created_at == prevCell.created_at)
+                  if (cell.scraped_timestamp == prevCell.scraped_timestamp && cell.dataset_value_id == prevCell.dataset_value_id && cell.dataset_link_id == prevCell.dataset_link_id && cell.scraped_attribute == prevCell.scraped_attribute)
                     puts "removing cell for being a duplicate", cell
                     removedCellsCount += 1
                   else
