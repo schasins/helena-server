@@ -9,6 +9,7 @@ class Dataset < ActiveRecord::Base
 
 	  	# {id: this.id, values: this.sentDatasetSlice}
 	  	dataset_id = params[:id]
+                pass_timestamp = Time.at(params[:pass_start_time].to_i/1000)
 
 	  	# using transactions for bulk insertion
 	  	# still won't be super fast, but should be sufficient for now.  todo: make it even better~
@@ -38,7 +39,8 @@ class Dataset < ActiveRecord::Base
 	        source_url_object = Url.find_or_make(source_url)
 	        top_frame_source_url_object = Url.find_or_make(top_frame_source_url)
 		  		positionLists[index].each{ |coords|
-		  			parameters = {dataset_id: dataset_id, 
+		  			parameters = {dataset_id: dataset_id,
+                    pass_timestamp: pass_timestamp,
 	            dataset_value_id: text_object.id, 
 	            dataset_link_id: link_object.id, 
 	            scraped_attribute: scraped_attribute_num,

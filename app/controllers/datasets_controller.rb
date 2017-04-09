@@ -166,6 +166,66 @@ end
 
   end
 
+  def downloaddetailedmultipass
+  	dataset = Dataset.find(params[:id])
+  	filename = gen_filename(dataset)
+
+  	cells = DatasetCell.includes(:dataset_value, :dataset_link).where({dataset_id: params[:id]}).order(pass_timestamp: :asc, row: :asc, col: :asc)
+
+    
+    rows = []
+  	currentRowIndex = -1
+        prevTimeStamp = -1
+        currentPassTimeStamp = -1
+        currentBaseLength = rows.length
+  	cells.each{ |cell|
+  		if (cell.row + currentBaseLength != currentRowIndex)
+
+                  # before we add a fresh row, let's add the pass timestamp (which is also the pass identifier) to the row
+                  if (currentRowIndex >= 0)
+                    # puts "pushing currentPassTimeStamp bc cell.row is new", cell.row, cell.col, "****"
+                    rows[currentRowIndex].push(currentPassTimeStamp.to_i)
+                  end
+
+                  if (cell.pass_timestamp != currentPassTimeStamp)
+                       # remember that each individual pass will start at row 0 again
+                       # we're about to swap to a new one
+                       currentBaseLength = rows.length
+                       currentPassTimeStamp = cell.pass_timestamp
+                    end
+
+                   # ok, now add a new row
+                    currentRowIndex = cell.row + currentBaseLength
+                  # puts "new currentRowIndex", currentRowIndex
+  		    rows.push([])
+  		end
+
+      # puts rows.length, currentRowIndex, "****"
+      if (cell.scraped_attribute == Scraped::TEXT)
+        rows[currentRowIndex].push(cell.dataset_value.text)
+  		elsif (cell.scraped_attribute == Scraped::LINK)
+        rows[currentRowIndex].push(cell.dataset_link.link)
+      else
+        # for now, default to putting the text in
+        rows[currentRowIndex].push(cell.dataset_value.text)
+      end
+
+      rows[currentRowIndex].push(cell.scraped_timestamp.to_i)
+  	}
+
+        # puts "pushing the last timestamp for last row"
+        # and let's add the pass timestamp for that last row
+        rows[currentRowIndex].push(currentPassTimeStamp.to_i)
+
+  	@rows = rows
+
+    response.headers['Content-Type'] = 'text/csv'
+    response.headers['Content-Disposition'] = 'attachment; filename=' + filename + '.csv'    
+    render :template => "datasets/download.csv.erb"
+
+  end
+
+
   def downloaddetailedallattributes
   	dataset = Dataset.find(params[:id])
   	filename = gen_filename(dataset)

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170322060713) do
+ActiveRecord::Schema.define(version: 20170406042551) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -41,6 +41,7 @@ ActiveRecord::Schema.define(version: 20170322060713) do
     t.integer  "top_frame_source_url_id"
     t.integer  "dataset_link_id"
     t.datetime "scraped_timestamp"
+    t.datetime "pass_timestamp"
   end
 
   add_index "dataset_cells", ["dataset_id"], name: "index_dataset_cells_on_dataset_id", using: :btree

@@ -21,6 +21,7 @@ Rails.application.routes.draw do
   get 'datasetsforgiving/:id' => 'datasets#downloadforgiving'
   get 'downloaddetailed/:id' => 'datasets#downloaddetailed'
   get 'downloaddetailedallattributes/:id' => 'datasets#downloaddetailedallattributes'
+  get 'downloaddetailedmultipass/:id' => 'datasets#downloaddetailedmultipass'
 
   post 'saveprogram', :to => 'programs#save_program', :as => 'saveprogram'
 
