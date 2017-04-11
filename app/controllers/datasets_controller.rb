@@ -201,14 +201,15 @@ end
   		end
 
       # puts rows.length, currentRowIndex, "****"
-      if (cell.scraped_attribute == Scraped::TEXT)
+      # for now again just add both
+      #if (cell.scraped_attribute == Scraped::TEXT)
         rows[currentRowIndex].push(cell.dataset_value.text)
-  		elsif (cell.scraped_attribute == Scraped::LINK)
+  #		elsif (cell.scraped_attribute == Scraped::LINK)
         rows[currentRowIndex].push(cell.dataset_link.link)
-      else
+   #   else
         # for now, default to putting the text in
-        rows[currentRowIndex].push(cell.dataset_value.text)
-      end
+    #    rows[currentRowIndex].push(cell.dataset_value.text)
+      #end
 
       rows[currentRowIndex].push(cell.scraped_timestamp.to_i)
   	}

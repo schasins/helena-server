@@ -17,7 +17,9 @@ class Dataset < ActiveRecord::Base
 	        nodes = JSON.parse(URI.decode(params[:nodes]))
 	        positionLists = JSON.parse(params[:position_lists])
 	        index = -1
+            
 		  	nodes.each{ |node|
+                
 	        index += 1
 	        text = node["text"]
 	        link = node["link"]
