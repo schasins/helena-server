@@ -3,7 +3,7 @@ class ProgramsController < ApplicationController
   protect_from_forgery with: :null_session, :only =>[:save_program]
 
   def index
-    @programs = Program.all
+    @programs = Program.all().select("name, id, updated_at")
   end
 
   def show
@@ -20,15 +20,18 @@ class ProgramsController < ApplicationController
       end
     end
 
-    programs = Program.where(id: params[:id])
     program = nil
-    if programs.length > 0 && programs[0].name == params[:name]
-      # for now, if names are same, assume we should overwrite the old one
-      program = programs[0]
-      program.serialized_program = params[:serialized_program]
+    programs = nil
+    if params[:id]
+      programs = Program.where(id: params[:id])
+    end
+    if programs && programs.length > 0 && programs[0].name == params[:name]
+        # for now, if names are same, assume we should overwrite the old one
+        program = programs[0]
+        program.serialized_program = params[:serialized_program]
     else
-      # if no saved program with the target id or if saved program didn't share name, need to make a fresh one
-      program = Program.create(params.permit(:serialized_program, :name))
+        # if no saved program with the target id or if saved program didn't share name, need to make a fresh one
+        program = Program.create(params.permit(:serialized_program, :name))
     end
     program.save_program_and_relations(relations)
 
