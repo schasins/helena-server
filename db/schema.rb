@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170406042551) do
+ActiveRecord::Schema.define(version: 20170425054315) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -115,6 +115,7 @@ ActiveRecord::Schema.define(version: 20170406042551) do
     t.text     "next_button_selector"
   end
 
+  add_index "relations", ["id", "selector", "selector_version"], name: "index_relations_on_id_and_selector_and_selector_version", unique: true, using: :btree
   add_index "relations", ["selector", "selector_version", "url_id"], name: "index_relations_on_selector_and_selector_version_and_url_id", unique: true, using: :btree
   add_index "relations", ["url_id"], name: "index_relations_on_url_id", using: :btree
 

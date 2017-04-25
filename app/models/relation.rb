@@ -7,8 +7,6 @@ class Relation < ActiveRecord::Base
 
 
   def self.save_relation(params)
-    puts "****** saverelation params"
-    puts params
     relation = nil
     new_relation = false
 
