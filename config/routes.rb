@@ -13,6 +13,7 @@ Rails.application.routes.draw do
   post 'retrieverelations', :to => 'relations#retrieve_relations', :as => 'retrieverelations'
   post 'allpagerelations', :to => 'relations#all_page_relations', :as => 'allpagerelations'
 
+=begin
   post 'newdatasetsid', :to => 'datasets#new', :as => 'newdatasetsid'
   get 'programfordataset/:id' => 'datasets#programfordataset'
   post 'updatedataset', :to => 'datasets#updatedataset', :as => 'updatedataset'
@@ -22,6 +23,14 @@ Rails.application.routes.draw do
   get 'downloaddetailed/:id' => 'datasets#downloaddetailed'
   get 'downloaddetailedallattributes/:id' => 'datasets#downloaddetailedallattributes'
   get 'downloaddetailedmultipass/:id' => 'datasets#downloaddetailedmultipass'
+=end
+
+  post 'newprogramrun', :to => 'program_runs#new', :as => 'newprogramrun'
+  post 'newprogramsubrun', :to => 'program_runs#new_sub_run', :as => 'newprogramsubrun'
+  post 'updaterunname', :to => 'program_runs#update_run_name', :as => 'updaterunname'
+  post 'datasetslice', :to => 'program_runs#save_slice', :as => 'datasetslice'
+  get 'datasets/run/:id' => 'program_runs#download_run'
+  get 'datasets/:id' => 'program_runs#download_all'
 
   post 'saveprogram', :to => 'programs#save_program', :as => 'saveprogram'
 
