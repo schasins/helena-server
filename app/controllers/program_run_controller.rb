@@ -109,6 +109,7 @@ class ProgramRunsController < ApplicationController
       currentRowIndex += 1
       if (currentProgRun != row.program_run_id)
         currentProgRunCounter += 1
+        currentProgRun = row.program_run_id
       end
 
       cells = row.dataset_cells.order(col: :asc)
