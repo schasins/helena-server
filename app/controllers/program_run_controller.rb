@@ -64,7 +64,7 @@ class ProgramRunsController < ApplicationController
   	filename = gen_filename_for_run(run)
 
     rows = DatasetRow.
-      where("dataset_rows.program_run_id = ?", run.id).
+      where({program_run_id: run.id}).
       includes(dataset_cells: [:dataset_value, :dataset_link]).
       order(run_row_index: :asc)
 
@@ -88,40 +88,47 @@ class ProgramRunsController < ApplicationController
         
       }
     }
-
     render_rows(outputrows, filename)
-
   end
 
   def download_all
     prog = Program.find(params[:id])
     filename = gen_filename_for_prog(prog)
 
-    cells = DatasetCell.joins(:dataset_row_dataset_cell_relationship).joins(:dataset_row).
-      where("dataset_rows.program_id = ?", prog.id).
-      includes(:dataset_value, :dataset_link).
-      order("dataset_rows.id ASC, dataset_rows.run_row_index ASC", col_index: :asc) # order first on the run, then on the index w/in the run, then col
+    rows = DatasetRow.
+      where({program_id: prog.id}).
+      includes(dataset_cells: [:dataset_value, :dataset_link]).
+      order(program_run_id: :asc, run_row_index: :asc)
 
-    rows = []
-    currentRowIndex = -1;
-    currentDatasetRowIndex = -1
-    cells.each{ |cell|
-      cellRowIndex = cell.dataset_row_dataset_cell_relationship.dataset_row
-      if (cellRowIndex != currentDatasetRowIndex)
-        currentDatasetRowIndex = cellRowIndex
-        currentRowIndex += 1
-        rows.push([])
+    outputrows = []
+    currentRowIndex = -1
+    currentProgRun = nil
+    currentProgRunCounter = 0
+    rows.each{ |row|
+      outputrows.push([])
+      currentRowIndex += 1
+      if (currentProgRun != row.program_run_id)
+        currentProgRunCounter += 1
       end
+
+      cells = row.dataset_cells.order(col: :asc)
+      cells.each{ |cell|
+
       if (cell.scraped_attribute == Scraped::TEXT)
-        rows[currentRowIndex].push(cell.dataset_value.text)
+        outputrows[currentRowIndex].push(cell.dataset_value.text)
       elsif (cell.scraped_attribute == Scraped::LINK)
-        rows[currentRowIndex].push(cell.dataset_link.link)
+        outputrows[currentRowIndex].push(cell.dataset_link.link)
       else
         # for now, default to putting the text in
-        rows[currentRowIndex].push(cell.dataset_value.text)
+        outputrows[currentRowIndex].push(cell.dataset_value.text)
       end
+        
+      }
+
+      # and at the end of the row, go ahead and add the program_run_id to let the user know which pass produced the row
+      outputrows[currentRowIndex].push(currentProgRunCounter)
     }
-    render_rows(rows)
+    render_rows(outputrows, filename)
   end
 
 end
