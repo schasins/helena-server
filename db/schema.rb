@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170426054315) do
+ActiveRecord::Schema.define(version: 20170428054315) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -110,6 +110,7 @@ ActiveRecord::Schema.define(version: 20170426054315) do
     t.integer  "program_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer  "run_count"
   end
 
   add_index "program_runs", ["program_id"], name: "index_program_runs_on_program_id", using: :btree
@@ -168,12 +169,17 @@ ActiveRecord::Schema.define(version: 20170426054315) do
 
   create_table "transaction_records", force: :cascade do |t|
     t.integer  "dataset_id"
-    t.datetime "created_at",    null: false
-    t.datetime "updated_at",    null: false
+    t.datetime "created_at",     null: false
+    t.datetime "updated_at",     null: false
     t.integer  "annotation_id"
+    t.integer  "program_id"
+    t.integer  "program_run_id"
+    t.datetime "commit_time"
   end
 
   add_index "transaction_records", ["dataset_id"], name: "index_transaction_records_on_dataset_id", using: :btree
+  add_index "transaction_records", ["program_id", "commit_time"], name: "index_transaction_records_on_program_id_and_commit_time", using: :btree
+  add_index "transaction_records", ["program_id", "program_run_id"], name: "index_transaction_records_on_program_id_and_program_run_id", using: :btree
 
   create_table "urls", force: :cascade do |t|
     t.text     "url"
