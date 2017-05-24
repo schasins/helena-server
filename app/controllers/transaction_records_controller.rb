@@ -11,7 +11,7 @@ class TransactionRecordsController < ApplicationController
   def new_with_dataset_slice
     ActiveRecord::Base.transaction do # put this all in a transaction bc we want to add the dataset slice iff commit record is saved
       transaction = TransactionRecord.transaction_saving_internals(params)
-      Dataset.save_slice_internals(params)
+      ProgramRun.save_slice_internals(params)
       render json: { transaction_id: transaction.id }
     end
   end
