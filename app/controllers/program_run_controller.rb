@@ -7,13 +7,13 @@ class ProgramRunsController < ApplicationController
 
   def new
     run = ProgramRun.create(params.permit(:program_id, :name))
-    subrun = ProgramSubRun.create({:program_run_id: run.id})
+    subrun = ProgramSubRun.create({program_run_id: run.id})
   	render json: { run_id: run.id, sub_run_id: subrun.id }
   end
 
   def new_sub_run
     run = ProgramRun.find(params.permit(:program_run_id))
-    subrun = ProgramSubRun.create({:program_run_id: run.id})
+    subrun = ProgramSubRun.create({program_run_id: run.id})
     render json: { sub_run_id: subrun.id }
   end
 
@@ -52,7 +52,7 @@ class ProgramRunsController < ApplicationController
       return fn
   end
 
-  def render_rows(rows)
+  def render_rows(rows, filename)
     @rows = rows
     response.headers['Content-Type'] = 'text/csv'
     response.headers['Content-Disposition'] = 'attachment; filename=' + filename + '.csv'    
@@ -63,29 +63,33 @@ class ProgramRunsController < ApplicationController
   	run = ProgramRun.find(params[:id])
   	filename = gen_filename_for_run(run)
 
-    cells = DatasetCell.joins(:dataset_row_dataset_cell_relationship).joins(:dataset_row).
+    rows = DatasetRow.
       where("dataset_rows.program_run_id = ?", run.id).
-      includes(:dataset_value, :dataset_link).
-      order("dataset_rows.run_row_index ASC", col_index: :asc)
+      includes(dataset_cells: [:dataset_value, :dataset_link]).
+      order(run_row_index: :asc)
 
-  	rows = []
-  	currentRowIndex = -1;
-  	cells.each{ |cell|
-      cellRowIndex = cell.dataset_row_dataset_cell_relationship.dataset_row
-  		if (cellRowIndex != currentRowIndex)
-  			currentRowIndex = cellRowIndex
-  			rows.push([])
-  		end
+    outputrows = []
+    currentRowIndex = -1
+    rows.each{ |row|
+      outputrows.push([])
+      currentRowIndex = row.run_row_index
+
+      cells = row.dataset_cells.order(col: :asc)
+      cells.each{ |cell|
+
       if (cell.scraped_attribute == Scraped::TEXT)
-        rows[currentRowIndex].push(cell.dataset_value.text)
+        outputrows[currentRowIndex].push(cell.dataset_value.text)
   		elsif (cell.scraped_attribute == Scraped::LINK)
-        rows[currentRowIndex].push(cell.dataset_link.link)
+        outputrows[currentRowIndex].push(cell.dataset_link.link)
       else
         # for now, default to putting the text in
-        rows[currentRowIndex].push(cell.dataset_value.text)
+        outputrows[currentRowIndex].push(cell.dataset_value.text)
       end
-  	}
-    render_rows(rows)
+        
+      }
+    }
+
+    render_rows(outputrows, filename)
 
   end
 

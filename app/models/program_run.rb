@@ -1,5 +1,7 @@
 class ProgramRun < ActiveRecord::Base
 
+        belongs_to :program
+
 	module Scraped # todo: shouldn't have this in both the model and the controller
 		TEXT = 1
 		LINK = 2
@@ -44,8 +46,7 @@ class ProgramRun < ActiveRecord::Base
 		        source_url_object = Url.find_or_make(source_url)
 		        top_frame_source_url_object = Url.find_or_make(top_frame_source_url)
 		  		positionLists[index].each{ |coords|
-		  			parameters = {dataset_id: dataset_id,
-	                pass_timestamp: pass_timestamp,
+		  			parameters = {
 	            	dataset_value_id: text_object.id, 
 	            	dataset_link_id: link_object.id, 
 	            	scraped_attribute: scraped_attribute_num,
