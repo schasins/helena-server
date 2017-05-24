@@ -101,8 +101,8 @@ class ProgramRunsController < ApplicationController
 
     rows = DatasetRow.
       where({program_id: prog.id}).
-      includes(dataset_cells: [:dataset_value, :dataset_link]).
-      order(run_count: :asc, run_row_index: :asc)
+      includes(:program_run, dataset_cells: [:dataset_value, :dataset_link]).
+      order("program_runs.run_count ASC", run_row_index: :asc)
 
     outputrows = []
     currentRowIndex = -1
@@ -112,7 +112,7 @@ class ProgramRunsController < ApplicationController
       outputrows.push([])
       currentRowIndex += 1
       if (currentProgRun != row.program_run_id)
-        progRunObj = ProgramRun.find(row.program_run_id)
+        progRunObj = row.program_run
         currentProgRunCounter = progRunObj.run_count
         currentProgRun = row.program_run_id
       end
