@@ -1,10 +1,16 @@
 class TransactionRecord < ActiveRecord::Base
-  belongs_to :dataset
+
+  belongs_to :program
+  belongs_to :program_run
+  belongs_to :dataset # get rid of this in future
 
   	def self.transaction_saving_internals(params)
-	    dataset_id = params[:dataset]
+  		program_id = params[:program_id]
+	    program_run_id = params[:program_run_id]
 	    annotation_id = params[:annotation_id]
-	    parameters = {dataset_id: dataset_id, annotation_id: annotation_id}
+	    commit_time = Time.at(params[:commit_time].to_i/1000)
+
+	    parameters = {program_id: program_id, program_run_id: program_run_id, annotation_id: annotation_id, commit_time: commit_time}
 	    transaction = TransactionRecord.create(parameters)
 
 	    transaction_items = JSON.parse(URI.decode(params[:transaction_attributes]))

@@ -17,12 +17,14 @@ class TransactionRecordsController < ApplicationController
   end
 
   def exists
-    dataset_id = params[:dataset]
+    program_id = params[:program_id]
+    program_run_id = params[:program_run_id]
     annotation_id = params[:annotation_id]
+    commit_time = Time.at(params[:commit_time].to_i/1000)
 
     # this is tricky.  need to select transactions based on having all the cells we want
-    transaction_query = TransactionRecord.where(dataset_id: dataset_id, annotation_id: annotation_id)
-    #.where(id: TransactionCell.where(attr_val: val, index: i).select(transaction_id))
+    transaction_query = TransactionRecord.where(program_id: program_id, annotation_id: annotation_id)
+    # for here we only filter based on having the same program, but can also use commit time and program_run to filter
 
     transaction_items = JSON.parse(URI.decode(params[:transaction_attributes]))
     index = -1
