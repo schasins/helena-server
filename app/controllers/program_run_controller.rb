@@ -6,7 +6,11 @@ class ProgramRunsController < ApplicationController
 	protect_from_forgery with: :null_session, :only =>[:new]
 
   def new
-    run = ProgramRun.create(params.permit(:program_id, :name))
+    prog_id = params[:program_id]
+    runs_so_far = ProgramRun.where({program_id: prog_id}).count
+    permitted = params.permit(:program_id, :name)
+    permitted[:run_count] = runs_so_far
+    run = ProgramRun.create(permitted)
     subrun = ProgramSubRun.create({program_run_id: run.id})
   	render json: { run_id: run.id, sub_run_id: subrun.id }
   end
@@ -98,7 +102,7 @@ class ProgramRunsController < ApplicationController
     rows = DatasetRow.
       where({program_id: prog.id}).
       includes(dataset_cells: [:dataset_value, :dataset_link]).
-      order(program_run_id: :asc, run_row_index: :asc)
+      order(run_count: :asc, run_row_index: :asc)
 
     outputrows = []
     currentRowIndex = -1
@@ -108,7 +112,8 @@ class ProgramRunsController < ApplicationController
       outputrows.push([])
       currentRowIndex += 1
       if (currentProgRun != row.program_run_id)
-        currentProgRunCounter += 1
+        progRunObj = ProgramRun.find(row.program_run_id)
+        currentProgRunCounter = progRunObj.run_count
         currentProgRun = row.program_run_id
       end
 
