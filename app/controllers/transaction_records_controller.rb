@@ -40,7 +40,7 @@ class TransactionRecordsController < ApplicationController
       # ok, for this we need to figure out what program runs we've done for the program.
       # if logical_time_diff is 2, we're allowed to skip if we've seen a duplicate in the last two runs
       # that is, this run plus either of the last 2
-      runs = ProgramRun.where(program_id: program_id).order(created_at :desc)
+      runs = ProgramRun.where(program_id: program_id).order(created_at: :desc)
       if (runs.size < (logical_time_diff + 1))
         # don't actually need to do any filtering.  the whole history of the executions falls in our target range
       else
