@@ -23,6 +23,7 @@ Rails.application.routes.draw do
   get 'downloaddetailed/:id' => 'datasets#downloaddetailed'
   get 'downloaddetailedallattributes/:id' => 'datasets#downloaddetailedallattributes'
   get 'downloadmultipass/:id' => 'datasets#downloadmultipass'
+  get 'downloadmultipassforgiving/:id' => 'datasets#downloadmultipassforgiving'
   get 'downloaddetailedmultipass/:id' => 'datasets#downloaddetailedmultipass'
 
   post 'newprogramrun', :to => 'program_runs#new', :as => 'newprogramrun'
