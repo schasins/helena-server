@@ -238,8 +238,9 @@ end
         prevTimeStamp = -1
         currentPassTimeStamp = -1
         currentBaseLength = rows.length
+    currentCellRowIndex = -1
     cells.each{ |cell|
-      if (cell.row + currentBaseLength != currentRowIndex)
+      if (cell.row != currentCellRowIndex)
 
                   # before we add a fresh row, let's add the pass timestamp (which is also the pass identifier) to the row
                   if (currentRowIndex >= 0)
@@ -256,6 +257,7 @@ end
 
                    # ok, now add a new row
                     currentRowIndex += 1
+                    currentCellRowIndex = cell.row
                   # puts "new currentRowIndex", currentRowIndex
           rows.push([])
       end
