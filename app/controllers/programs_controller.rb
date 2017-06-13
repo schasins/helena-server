@@ -12,6 +12,8 @@ class ProgramsController < ApplicationController
   end
 
   def save_program
+    puts "save_program received time", Time.now().to_i
+
     relation_objects = params[:relation_objects]
     relations = []
     if relation_objects
@@ -31,7 +33,7 @@ class ProgramsController < ApplicationController
         program.serialized_program = params[:serialized_program]
     else
         # if no saved program with the target id or if saved program didn't share name, need to make a fresh one
-        program = Program.create(params.permit(:serialized_program, :name))
+      program = Program.create(params.permit(:serialized_program, :name))
     end
     program.save_program_and_relations(relations)
 

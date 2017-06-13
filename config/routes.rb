@@ -13,17 +13,16 @@ Rails.application.routes.draw do
   post 'retrieverelations', :to => 'relations#retrieve_relations', :as => 'retrieverelations'
   post 'allpagerelations', :to => 'relations#all_page_relations', :as => 'allpagerelations'
 
-=begin
-  post 'newdatasetsid', :to => 'datasets#new', :as => 'newdatasetsid'
-  get 'programfordataset/:id' => 'datasets#programfordataset'
-  post 'updatedataset', :to => 'datasets#updatedataset', :as => 'updatedataset'
-  post 'datasetslice', :to => 'datasets#save_slice', :as => 'datasetslice'
-  get 'datasets/:id' => 'datasets#download'
+# get rid of this block soon
+  #post 'newdatasetsid', :to => 'datasets#new', :as => 'newdatasetsid'
+  #get 'programfordataset/:id' => 'datasets#programfordataset'
+  #post 'updatedataset', :to => 'datasets#updatedataset', :as => 'updatedataset'
+  #post 'datasetslice', :to => 'datasets#save_slice', :as => 'datasetslice'
+  get 'datasetsold/:id' => 'datasets#download'
   get 'datasetsforgiving/:id' => 'datasets#downloadforgiving'
   get 'downloaddetailed/:id' => 'datasets#downloaddetailed'
   get 'downloaddetailedallattributes/:id' => 'datasets#downloaddetailedallattributes'
   get 'downloaddetailedmultipass/:id' => 'datasets#downloaddetailedmultipass'
-=end
 
   post 'newprogramrun', :to => 'program_runs#new', :as => 'newprogramrun'
   post 'newprogramsubrun', :to => 'program_runs#new_sub_run', :as => 'newprogramsubrun'
