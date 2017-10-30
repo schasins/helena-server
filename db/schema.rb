@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170428054315) do
+ActiveRecord::Schema.define(version: 20171030022939) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -167,6 +167,15 @@ ActiveRecord::Schema.define(version: 20170428054315) do
   add_index "transaction_cells", ["index", "attr_value"], name: "index_transaction_cells_on_index_and_attr_value", using: :btree
   add_index "transaction_cells", ["transaction_record_id"], name: "index_transaction_cells_on_transaction_record_id", using: :btree
 
+  create_table "transaction_locks", force: :cascade do |t|
+    t.integer "program_id"
+    t.integer "program_run_id"
+    t.integer "annotation_id"
+    t.text    "transaction_items_str"
+  end
+
+  add_index "transaction_locks", ["program_id", "program_run_id", "annotation_id", "transaction_items_str"], name: "all_unique_index", unique: true, using: :btree
+
   create_table "transaction_records", force: :cascade do |t|
     t.integer  "dataset_id"
     t.datetime "created_at",     null: false
@@ -175,6 +184,7 @@ ActiveRecord::Schema.define(version: 20170428054315) do
     t.integer  "program_id"
     t.integer  "program_run_id"
     t.datetime "commit_time"
+    t.boolean  "finished"
   end
 
   add_index "transaction_records", ["dataset_id"], name: "index_transaction_records_on_dataset_id", using: :btree

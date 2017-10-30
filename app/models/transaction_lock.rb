@@ -1,6 +1,7 @@
 class TransactionLock < ActiveRecord::Base
 
   validates :transaction_items_str, uniqueness: {scope: [:program_id, :program_run_id , :annotation_id]}
+  validates :transaction_items_str, presence: true
 
   belongs_to :program
   belongs_to :program_run

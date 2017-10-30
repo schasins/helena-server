@@ -8,16 +8,12 @@ class TransactionLocksController < ApplicationController
     render json: { transaction_id: transaction.id }
   end
 
-  def exists
-    exists = TransactionRecord.exists(params)
-    render json: { exists: exists }
-  end
-
   def make_if_not_exists
-    exists = TransactionRecord.exists(params)
+    exists = TransactionLock.exists(params)
     # for the exists case, we just tell the user that it already exists
     if (exists)
       render json: { task_yours: false } # this thread shouldn't do this task
+      return
     end
 
     # for the not exists case, we want to make the lock record.  but only if no one else got it first
@@ -25,6 +21,7 @@ class TransactionLocksController < ApplicationController
       transaction = TransactionLock.transaction_saving_internals(params)
       # handle success here
       render json: { task_yours: true, transaction_lock_id: transaction.id }
+      return
     rescue ActiveRecord::RecordInvalid => invalid
        # handle failure here
        # remember that we require unique (program_id, program_run_id, annotation_id, transaction_items_str) tuple
