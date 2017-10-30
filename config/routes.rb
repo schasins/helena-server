@@ -39,6 +39,7 @@ Rails.application.routes.draw do
   post 'newtransaction', :to => 'transaction_records#new', :as => 'newtransaction'
   post 'newtransactionwithdata', :to => 'transaction_records#new_with_dataset_slice', :as => 'newtransactionwithdata'
   post 'transactionexists', :to => 'transaction_records#exists', :as => 'transactionexists'
+  post 'locktransaction', :to => 'transaction_locks#make_if_not_exists', :as => 'locktransaction'
 
   resources :relations
   resources :columns
