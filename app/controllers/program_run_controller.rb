@@ -16,7 +16,7 @@ class ProgramRunsController < ApplicationController
   end
 
   def new_sub_run
-    run = ProgramRun.find(params.permit(:program_run_id))
+    run = ProgramRun.find(params[:program_run_id])
     subrun = ProgramSubRun.create({program_run_id: run.id})
     render json: { sub_run_id: subrun.id }
   end
