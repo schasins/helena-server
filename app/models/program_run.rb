@@ -59,7 +59,7 @@ class ProgramRun < ActiveRecord::Base
 		  			# which means since the col may not even be changing, we may be very redundant!  todo: go back and remove this redundancy in future
 		  			# but we also need to make sure we have a DatasetRow for this cell.
 		  			run_row_index = coords[0]
-		  			dataset_rows = DatasetRow.where({program_run_id: run_id, run_row_index: run_row_index})
+		  			dataset_rows = DatasetRow.where({program_run_id: run_id, program_sub_run_id: sub_run_id, run_row_index: run_row_index})
 		  			row = nil
 		  			if (dataset_rows.empty?)
 		  				# ok, we don't yet have a row, have to make a new one
