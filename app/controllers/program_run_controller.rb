@@ -76,7 +76,7 @@ class ProgramRunsController < ApplicationController
     currentRowIndex = -1
     rows.each{ |row|
       outputrows.push([])
-      currentRowIndex = row.run_row_index
+      currentRowIndex += 1
 
       cells = row.dataset_cells.order(col: :asc)
       cells.each{ |cell|
