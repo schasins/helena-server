@@ -70,7 +70,7 @@ class ProgramRunsController < ApplicationController
     rows = DatasetRow.
       where({program_run_id: run.id}).
       includes(dataset_cells: [:dataset_value, :dataset_link]).
-      order(run_row_index: :asc)
+      order(program_sub_run_id: :asc, run_row_index: :asc)
 
     outputrows = []
     currentRowIndex = -1
