@@ -47,15 +47,6 @@ class ProgramRunsController < ApplicationController
       return fn
   end
 
-  def gen_filename_for_run(run)
-      fn = run.name
-      if (fn == nil or fn == "")
-          fn = "dataset"
-      end
-      fn = fn + "_" + run.program_id.to_s + "_" + run.id.to_s
-      return fn
-  end
-
   def render_rows(rows, filename)
     @rows = rows
     response.headers['Content-Type'] = 'text/csv'
@@ -65,33 +56,15 @@ class ProgramRunsController < ApplicationController
 
   def download_run
   	run = ProgramRun.find(params[:id])
-  	filename = gen_filename_for_run(run)
+    filename = run.gen_filename()
+    outputrows = run.get_output_rows(false)
+    render_rows(outputrows, filename)
+  end
 
-    rows = DatasetRow.
-      where({program_run_id: run.id}).
-      includes(dataset_cells: [:dataset_value, :dataset_link]).
-      order(program_sub_run_id: :asc, run_row_index: :asc)
-
-    outputrows = []
-    currentRowIndex = -1
-    rows.each{ |row|
-      outputrows.push([])
-      currentRowIndex += 1
-
-      cells = row.dataset_cells.order(col: :asc)
-      cells.each{ |cell|
-
-      if (cell.scraped_attribute == Scraped::TEXT)
-        outputrows[currentRowIndex].push(cell.dataset_value.text)
-  		elsif (cell.scraped_attribute == Scraped::LINK)
-        outputrows[currentRowIndex].push(cell.dataset_link.link)
-      else
-        # for now, default to putting the text in
-        outputrows[currentRowIndex].push(cell.dataset_value.text)
-      end
-        
-      }
-    }
+  def download_run_detailed
+    run = ProgramRun.find(params[:id])
+    filename = run.gen_filename()
+    outputrows = run.get_output_rows(true)
     render_rows(outputrows, filename)
   end
 

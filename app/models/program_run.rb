@@ -7,6 +7,46 @@ class ProgramRun < ActiveRecord::Base
 		LINK = 2
 	end
 
+	def gen_filename()
+		fn = self.name
+		if (fn == nil or fn == "")
+		  fn = "dataset"
+		end
+		fn = fn + "_" + run.program_id.to_s + "_" + run.id.to_s
+		return fn
+	end
+
+	def gen_output_rows(detailedRows)
+	    rows = DatasetRow.
+	      where({program_run_id: self.id}).
+	      includes(dataset_cells: [:dataset_value, :dataset_link]).
+	      order(program_sub_run_id: :asc, run_row_index: :asc)
+
+	    outputrows = []
+	    currentRowIndex = -1
+	    rows.each{ |row|
+	      outputrows.push([])
+	      currentRowIndex += 1
+
+	      cells = row.dataset_cells.order(col: :asc)
+	      cells.each{ |cell|
+
+	      if (cell.scraped_attribute == Scraped::TEXT)
+	        outputrows[currentRowIndex].push(cell.dataset_value.text)
+	  		elsif (cell.scraped_attribute == Scraped::LINK)
+	        outputrows[currentRowIndex].push(cell.dataset_link.link)
+	      else
+	        # for now, default to putting the text in
+	        outputrows[currentRowIndex].push(cell.dataset_value.text)
+	      end
+	      }
+	      if (detailedRows){
+	      	outputrows[currentRowIndex].push(cell.scraped_timestamp)
+	      }
+	    }
+	    return outputrows
+	end
+
 	def self.save_slice_internals(params)
 
 	  	# {id: this.id, values: this.sentDatasetSlice}

@@ -31,6 +31,7 @@ Rails.application.routes.draw do
   post 'updaterunname', :to => 'program_runs#update_run_name', :as => 'updaterunname'
   post 'datasetslice', :to => 'program_runs#save_slice', :as => 'datasetslice'
   get 'datasets/run/:id' => 'program_runs#download_run'
+  get 'datasets/rundetailed/:id' => 'program_runs#download_run_detailed'
   get 'datasets/:id' => 'program_runs#download_all'
 
   post 'saveprogram', :to => 'programs#save_program', :as => 'saveprogram'
