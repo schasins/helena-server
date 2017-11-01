@@ -29,20 +29,24 @@ class ProgramRun < ActiveRecord::Base
 	      currentRowIndex += 1
 
 	      cells = row.dataset_cells.order(col: :asc)
+	      scraped_times = []
 	      cells.each{ |cell|
 
-	      if (cell.scraped_attribute == Scraped::TEXT)
-	        outputrows[currentRowIndex].push(cell.dataset_value.text)
-	  		elsif (cell.scraped_attribute == Scraped::LINK)
-	        outputrows[currentRowIndex].push(cell.dataset_link.link)
-	      else
-	        # for now, default to putting the text in
-	        outputrows[currentRowIndex].push(cell.dataset_value.text)
-	      end
-	      if (detailedRows)
-	      	outputrows[currentRowIndex].push(cell.scraped_timestamp)
-	      end
-              }
+		      if (cell.scraped_attribute == Scraped::TEXT)
+		        outputrows[currentRowIndex].push(cell.dataset_value.text)
+		  	  elsif (cell.scraped_attribute == Scraped::LINK)
+		        outputrows[currentRowIndex].push(cell.dataset_link.link)
+		      else
+		        # for now, default to putting the text in
+		        outputrows[currentRowIndex].push(cell.dataset_value.text)
+		      end
+		      if (detailedRows and cell.scraped_timestamp)
+		      	scraped_times.push(cell.scraped_timestamp)
+		      end
+          }
+          if (detailedRows)
+          	outputrows[currentRowIndex].push(scraped_times.max)
+          end
 	    }
 	    return outputrows
 	end
