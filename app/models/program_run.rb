@@ -12,11 +12,11 @@ class ProgramRun < ActiveRecord::Base
 		if (fn == nil or fn == "")
 		  fn = "dataset"
 		end
-		fn = fn + "_" + run.program_id.to_s + "_" + run.id.to_s
+		fn = fn + "_" + self.program_id.to_s + "_" + self.id.to_s
 		return fn
 	end
 
-	def gen_output_rows(detailedRows)
+	def get_output_rows(detailedRows)
 	    rows = DatasetRow.
 	      where({program_run_id: self.id}).
 	      includes(dataset_cells: [:dataset_value, :dataset_link]).
@@ -39,10 +39,10 @@ class ProgramRun < ActiveRecord::Base
 	        # for now, default to putting the text in
 	        outputrows[currentRowIndex].push(cell.dataset_value.text)
 	      end
-	      }
-	      if (detailedRows){
+	      if (detailedRows)
 	      	outputrows[currentRowIndex].push(cell.scraped_timestamp)
-	      }
+	      end
+              }
 	    }
 	    return outputrows
 	end
