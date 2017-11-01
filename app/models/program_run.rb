@@ -45,7 +45,7 @@ class ProgramRun < ActiveRecord::Base
 		      end
           }
           if (detailedRows)
-          	outputrows[currentRowIndex].push(scraped_times.max)
+          	outputrows[currentRowIndex].push(scraped_times.max.to_i)
           end
 	    }
 	    return outputrows
