@@ -30,9 +30,9 @@ Rails.application.routes.draw do
   post 'newprogramsubrun', :to => 'program_runs#new_sub_run', :as => 'newprogramsubrun'
   post 'updaterunname', :to => 'program_runs#update_run_name', :as => 'updaterunname'
   post 'datasetslice', :to => 'program_runs#save_slice', :as => 'datasetslice'
-  get 'datasets/run/:id' => 'program_runs#download_run'
-  get 'datasets/rundetailed/:id' => 'program_runs#download_run_detailed'
-  get 'datasets/:id' => 'program_runs#download_all'
+  get 'datasets/run/:id' => 'program_runs#download_run', :defaults => { :format => 'csv' }
+  get 'datasets/rundetailed/:id' => 'program_runs#download_run_detailed', :defaults => { :format => 'csv' }
+  get 'datasets/:id' => 'program_runs#download_all', :defaults => { :format => 'csv' }
 
   post 'saveprogram', :to => 'programs#save_program', :as => 'saveprogram'
 

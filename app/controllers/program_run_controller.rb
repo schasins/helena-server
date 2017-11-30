@@ -100,17 +100,17 @@ class ProgramRunsController < ApplicationController
 
   def download_run
     run = ProgramRun.find(params[:id])
-    filename = run.gen_filename()
+    filename = run.gen_filename()+".csv"
     respond_to do |format|
-      format.csv render_csv_helper(false, run, filename)
+      format.csv {render_csv_helper(false, run, filename)}
     end
   end
 
   def download_run_detailed
     run = ProgramRun.find(params[:id])
-    filename = run.gen_filename()
+    filename = run.gen_filename()+".csv"
     respond_to do |format|
-      format.csv render_csv_helper(true, run, filename)
+      format.csv {render_csv_helper(true, run, filename)}
     end
   end
 
@@ -138,7 +138,7 @@ class ProgramRunsController < ApplicationController
 
   def csv_lines(detailed, run)
     Enumerator.new do |output|
-      Dataset.batch_based_construction(detailed, run){ |row| 
+      ProgramRun.batch_based_construction(detailed, run){ |row| 
         output << CSV.generate_line(row) 
       }
     end

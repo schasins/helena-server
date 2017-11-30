@@ -17,7 +17,6 @@ class ProgramRun < ActiveRecord::Base
 
 	      group.each { |row|	      
 		      currRow = []
-		      currentRowIndex += 1
 
 		      cells = row.dataset_cells.order(col: :asc)
 		      scraped_times = []
