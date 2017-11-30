@@ -13,7 +13,7 @@ class ProgramRun < ActiveRecord::Base
         DatasetRow.where({program_run_id: run.id}).
 	      includes(dataset_cells: [:dataset_value, :dataset_link]).
 	      order(program_sub_run_id: :asc, run_row_index: :asc).
-	      find_in_batches do |group|
+	      find_in_batches(batch_size: 100) do |group|
 
 		      group_rows_str = ""
 		      group.each { |row|	      
