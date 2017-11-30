@@ -102,7 +102,7 @@ class ProgramRunsController < ApplicationController
     run = ProgramRun.find(params[:id])
     filename = run.gen_filename()
     respond_to do |format|
-      format.csv render_csv(false, run, filename)
+      format.csv render_csv_helper(false, run, filename)
     end
   end
 
@@ -110,11 +110,11 @@ class ProgramRunsController < ApplicationController
     run = ProgramRun.find(params[:id])
     filename = run.gen_filename()
     respond_to do |format|
-      format.csv render_csv(true, run, filename)
+      format.csv render_csv_helper(true, run, filename)
     end
   end
 
-  def render_csv(detailed, run, filename)
+  def render_csv_helper(detailed, run, filename)
     set_file_headers(filename)
     set_streaming_headers()
 
