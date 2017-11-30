@@ -13,9 +13,9 @@ class ProgramRun < ActiveRecord::Base
         DatasetRow.where({program_run_id: run.id}).
 	      includes(dataset_cells: [:dataset_value, :dataset_link]).
 	      order(program_sub_run_id: :asc, run_row_index: :asc).
-	      find_in_batches(batch_size: 100) do |group|
+	      find_in_batches(batch_size: 2000) do |group|
 
-		      group_rows_str = ""
+		      #group_rows_str = ""
 		      group.each { |row|	      
 			      currRow = []
 
@@ -41,10 +41,11 @@ class ProgramRun < ActiveRecord::Base
 
 		          # ok, we've put together the whole current row.  yield it so we can stream it
 		          # yield currRow
-		          group_rows_str << CSV.generate_line(currRow) 
+		          #group_rows_str << CSV.generate_line(currRow)
+                          yield CSV.generate_line(currRow) 
 		      }
 		      # don't want to yield on a per-row basis, but yield on a per-group basis for sure
-		      yield group_rows_str
+		      #yield group_rows_str
 
 	    end
 	  end

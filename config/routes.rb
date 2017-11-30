@@ -25,6 +25,8 @@ Rails.application.routes.draw do
   get 'downloadmultipass/:id' => 'datasets#downloadmultipass'
   get 'downloadmultipassforgiving/:id' => 'datasets#downloadmultipassforgiving'
   get 'downloaddetailedmultipass/:id' => 'datasets#downloaddetailedmultipass'
+  get 'datasets/runnostream/:id' => 'program_runs#download_run_old', :defaults => { :format => 'csv' }
+  get 'datasets/rundetailednostream/:id' => 'program_runs#download_run_detailed_old', :defaults => { :format => 'csv' }
 
   post 'newprogramrun', :to => 'program_runs#new', :as => 'newprogramrun'
   post 'newprogramsubrun', :to => 'program_runs#new_sub_run', :as => 'newprogramsubrun'
