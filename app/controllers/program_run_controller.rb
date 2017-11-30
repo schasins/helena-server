@@ -5,6 +5,48 @@ class ProgramRunsController < ApplicationController
 	skip_before_action :protect_from_forgery, :only =>[:new] # save_relation is going to be coming from the Chrome extension, so can't get the CSRF token.  in future should consider whether we should require some kind of authentication for this
 	protect_from_forgery with: :null_session, :only =>[:new]
 
+  #-------------------------
+
+  def download()
+    dataset = Dataset.find(params[:id])
+    filename = gen_filename(dataset)
+    respond_to do |format|
+      format.csv render_csv(dataset, filename)
+    end
+  end
+
+  def render_csv(dataset, filename)
+    set_file_headers(filename)
+    set_streaming_headers()
+
+    response.status = 200
+
+    #setting the body to an enumerator, rails will iterate this enumerator
+    self.response_body = csv_lines(dataset)
+  end
+
+  def set_file_headers(file_name)
+    headers["Content-Type"] = "text/csv"
+    headers["Content-disposition"] = "attachment; filename=\"#{file_name}\""
+  end
+
+  def set_streaming_headers()
+    #nginx doc: Setting this to "no" will allow unbuffered responses suitable for Comet and HTTP streaming applications
+    headers['X-Accel-Buffering'] = 'no'
+    headers["Cache-Control"] ||= "no-cache"
+    headers.delete("Content-Length")
+  end
+
+  def csv_lines(dataset)
+    Enumerator.new do |output|
+      Dataset.batch_based_construction(dataset){ |row| 
+        output << CSV.generate_line(row) 
+      }
+    end
+  end
+
+#-------------------------
+
   def new
     prog_id = params[:program_id]
     runs_so_far = ProgramRun.where({program_id: prog_id}).count
@@ -54,14 +96,64 @@ class ProgramRunsController < ApplicationController
     render :template => "datasets/download.csv.erb"
   end
 
+  #-------------------------
+
   def download_run
+    run = ProgramRun.find(params[:id])
+    filename = run.gen_filename()
+    respond_to do |format|
+      format.csv render_csv(false, run, filename)
+    end
+  end
+
+  def download_run_detailed
+    run = ProgramRun.find(params[:id])
+    filename = run.gen_filename()
+    respond_to do |format|
+      format.csv render_csv(true, run, filename)
+    end
+  end
+
+  def render_csv(detailed, run, filename)
+    set_file_headers(filename)
+    set_streaming_headers()
+
+    response.status = 200
+
+    #setting the body to an enumerator, rails will iterate this enumerator
+    self.response_body = csv_lines(detailed, run)
+  end
+
+  def set_file_headers(file_name)
+    headers["Content-Type"] = "text/csv"
+    headers["Content-disposition"] = "attachment; filename=\"#{file_name}\""
+  end
+
+  def set_streaming_headers()
+    #nginx doc: Setting this to "no" will allow unbuffered responses suitable for Comet and HTTP streaming applications
+    headers['X-Accel-Buffering'] = 'no'
+    headers["Cache-Control"] ||= "no-cache"
+    headers.delete("Content-Length")
+  end
+
+  def csv_lines(detailed, run)
+    Enumerator.new do |output|
+      Dataset.batch_based_construction(detailed, run){ |row| 
+        output << CSV.generate_line(row) 
+      }
+    end
+  end
+
+#-------------------------
+
+  def download_run_old
   	run = ProgramRun.find(params[:id])
     filename = run.gen_filename()
     outputrows = run.get_output_rows(false)
     render_rows(outputrows, filename)
   end
 
-  def download_run_detailed
+  def download_run_detailed_old
     run = ProgramRun.find(params[:id])
     filename = run.gen_filename()
     outputrows = run.get_output_rows(true)

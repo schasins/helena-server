@@ -7,6 +7,46 @@ class ProgramRun < ActiveRecord::Base
 		LINK = 2
 	end
 
+#--------------------
+
+	  def self.batch_based_construction(detailedRows, run, &block)
+        DatasetRow.where({program_run_id: run.id}).
+	      includes(dataset_cells: [:dataset_value, :dataset_link]).
+	      order(program_sub_run_id: :asc, run_row_index: :asc).
+	      find_in_batches do |group|
+
+	      group.each { |row|	      
+		      currRow = []
+		      currentRowIndex += 1
+
+		      cells = row.dataset_cells.order(col: :asc)
+		      scraped_times = []
+		      cells.each{ |cell|
+
+			      if (cell.scraped_attribute == Scraped::TEXT)
+			        currRow.push(cell.dataset_value.text)
+			  	  elsif (cell.scraped_attribute == Scraped::LINK)
+			        currRow.push(cell.dataset_link.link)
+			      else
+			        # for now, default to putting the text in
+			        currRow.push(cell.dataset_value.text)
+			      end
+			      if (detailedRows and cell.scraped_timestamp)
+			      	scraped_times.push(cell.scraped_timestamp)
+			      end
+	          }
+	          if (detailedRows)
+	          	currRow.push(scraped_times.max.to_i)
+	          end
+
+	          # ok, we've put together the whole current row.  yield it so we can stream it
+	          yield currRow
+	      }
+	    end
+	  end
+
+#--------------------
+
 	def gen_filename()
 		fn = self.name
 		if (fn == nil or fn == "")
