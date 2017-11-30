@@ -44,7 +44,49 @@ class DatasetsController < ApplicationController
       return fn
   end
 
-  def download
+#-------------------------
+
+  def download()
+    dataset = Dataset.find(params[:id])
+    filename = gen_filename(dataset)
+    respond_to do |format|
+      format.csv render_csv(dataset, filename)
+    end
+  end
+
+  def render_csv(dataset, filename)
+    set_file_headers(filename)
+    set_streaming_headers()
+
+    response.status = 200
+
+    #setting the body to an enumerator, rails will iterate this enumerator
+    self.response_body = csv_lines(dataset)
+  end
+
+  def set_file_headers(file_name)
+    headers["Content-Type"] = "text/csv"
+    headers["Content-disposition"] = "attachment; filename=\"#{file_name}\""
+  end
+
+  def set_streaming_headers()
+    #nginx doc: Setting this to "no" will allow unbuffered responses suitable for Comet and HTTP streaming applications
+    headers['X-Accel-Buffering'] = 'no'
+    headers["Cache-Control"] ||= "no-cache"
+    headers.delete("Content-Length")
+  end
+
+  def csv_lines(dataset)
+    Enumerator.new do |output|
+      Dataset.batch_based_construction(dataset){ |row| 
+        output << CSV.generate_line(row) 
+      }
+    end
+  end
+
+#-------------------------
+
+  def downloadOld
   	dataset = Dataset.find(params[:id])
   	filename = gen_filename(dataset)
 

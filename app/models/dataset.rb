@@ -5,6 +5,59 @@ class Dataset < ActiveRecord::Base
 		LINK = 2
 	end
 
+#--------------------
+
+	  def self.batch_based_construction(dataset, &block)
+	  	currentRowIndex = -1;
+        prevTimeStamp = -1
+        currentPassTimeStamp = -1
+        currentBaseLength = rows.length
+
+        currRow = []
+
+    	DatasetCell.includes(:dataset_value, :dataset_link)
+    		.where({dataset_id: dataset.id})
+    		.order(pass_timestamp: :asc, row: :asc, col: :asc)
+    		.find_in_batches do |group|
+
+    		group.each { |cell|
+				if (cell.row + currentBaseLength != currentRowIndex)
+					# before we add a fresh row, let's add the pass timestamp (which is also the pass identifier) to the row
+					if (currentRowIndex >= 0)
+						# puts "pushing currentPassTimeStamp bc cell.row is new", cell.row, cell.col, "****"
+						currRow.push(currentPassTimeStamp.to_i)
+					end
+
+					if (cell.pass_timestamp != currentPassTimeStamp)
+						# remember that each individual pass will start at row 0 again
+						# we're about to swap to a new one
+						currentBaseLength = rows.length
+						currentPassTimeStamp = cell.pass_timestamp
+					end
+
+					# yield the row we've built so far...
+					yield currRow
+
+					# ok, now start a new row
+					currentRowIndex = cell.row + currentBaseLength
+					# puts "new currentRowIndex", currentRowIndex
+					currRow = []
+				end
+
+				if (cell.scraped_attribute == Scraped::TEXT)
+					currRow.push(cell.dataset_value.text)
+				elsif (cell.scraped_attribute == Scraped::LINK)
+					currRow.push(cell.dataset_link.link)
+				else
+					# for now, default to putting the text in
+					currRow.push(cell.dataset_value.text)
+				end
+    		}
+    	end
+	  end
+
+#--------------------
+
 	def self.save_slice_internals(params)
 
 	  	# {id: this.id, values: this.sentDatasetSlice}
