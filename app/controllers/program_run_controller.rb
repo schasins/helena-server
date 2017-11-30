@@ -138,8 +138,8 @@ class ProgramRunsController < ApplicationController
 
   def csv_lines(detailed, run)
     Enumerator.new do |output|
-      ProgramRun.batch_based_construction(detailed, run){ |row| 
-        output << CSV.generate_line(row) 
+      ProgramRun.batch_based_construction(detailed, run){ |groupstr| 
+        output << groupstr 
       }
     end
   end

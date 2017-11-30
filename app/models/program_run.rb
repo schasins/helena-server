@@ -15,32 +15,37 @@ class ProgramRun < ActiveRecord::Base
 	      order(program_sub_run_id: :asc, run_row_index: :asc).
 	      find_in_batches do |group|
 
-	      group.each { |row|	      
-		      currRow = []
+		      group_rows_str = ""
+		      group.each { |row|	      
+			      currRow = []
 
-		      cells = row.dataset_cells.order(col: :asc)
-		      scraped_times = []
-		      cells.each{ |cell|
+			      cells = row.dataset_cells.order(col: :asc)
+			      scraped_times = []
+			      cells.each{ |cell|
 
-			      if (cell.scraped_attribute == Scraped::TEXT)
-			        currRow.push(cell.dataset_value.text)
-			  	  elsif (cell.scraped_attribute == Scraped::LINK)
-			        currRow.push(cell.dataset_link.link)
-			      else
-			        # for now, default to putting the text in
-			        currRow.push(cell.dataset_value.text)
-			      end
-			      if (detailedRows and cell.scraped_timestamp)
-			      	scraped_times.push(cell.scraped_timestamp)
-			      end
-	          }
-	          if (detailedRows)
-	          	currRow.push(scraped_times.max.to_i)
-	          end
+				      if (cell.scraped_attribute == Scraped::TEXT)
+				        currRow.push(cell.dataset_value.text)
+				  	  elsif (cell.scraped_attribute == Scraped::LINK)
+				        currRow.push(cell.dataset_link.link)
+				      else
+				        # for now, default to putting the text in
+				        currRow.push(cell.dataset_value.text)
+				      end
+				      if (detailedRows and cell.scraped_timestamp)
+				      	scraped_times.push(cell.scraped_timestamp)
+				      end
+		          }
+		          if (detailedRows)
+		          	currRow.push(scraped_times.max.to_i)
+		          end
 
-	          # ok, we've put together the whole current row.  yield it so we can stream it
-	          yield currRow
-	      }
+		          # ok, we've put together the whole current row.  yield it so we can stream it
+		          # yield currRow
+		          group_rows_str << CSV.generate_line(currRow) 
+		      }
+		      # don't want to yield on a per-row basis, but yield on a per-group basis for sure
+		      yield group_rows_str
+
 	    end
 	  end
 
