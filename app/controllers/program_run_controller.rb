@@ -102,7 +102,7 @@ class ProgramRunsController < ApplicationController
     run = ProgramRun.find(params[:id])
     filename = run.gen_filename()+".csv"
     respond_to do |format|
-      format.csv {render_csv_helper(false, run, filename)}
+      format.csv {render_csv_helper(false, run, filename, false)}
     end
   end
 
@@ -110,18 +110,26 @@ class ProgramRunsController < ApplicationController
     run = ProgramRun.find(params[:id])
     filename = run.gen_filename()+".csv"
     respond_to do |format|
-      format.csv {render_csv_helper(true, run, filename)}
+      format.csv {render_csv_helper(true, run, filename, false)}
     end
   end
 
-  def render_csv_helper(detailed, run, filename)
+  def download_all_runs
+    prog = Program.find(params[:id])
+    filename = gen_filename_for_prog(prog)+".csv"
+    respond_to do |format|
+      format.csv {render_csv_helper(false, prog, filename, true)}
+    end
+  end
+
+  def render_csv_helper(detailed, obj, filename, all_runs)
     set_file_headers(filename)
     set_streaming_headers()
 
     response.status = 200
 
     #setting the body to an enumerator, rails will iterate this enumerator
-    self.response_body = csv_lines(detailed, run)
+    self.response_body = csv_lines_(detailed, obj, all_runs)
   end
 
   def set_file_headers(file_name)
@@ -136,11 +144,19 @@ class ProgramRunsController < ApplicationController
     headers.delete("Content-Length")
   end
 
-  def csv_lines(detailed, run)
-    Enumerator.new do |output|
-      ProgramRun.batch_based_construction(detailed, run){ |str| 
-        output << str 
-      }
+  def csv_lines(detailed, obj, all_runs)
+    if (all_runs)
+      Enumerator.new do |output|
+        ProgramRun.all_runs_batch_based_construction(detailed, obj){ |str| 
+          output << str 
+        }
+      end
+    else
+      Enumerator.new do |output|
+        ProgramRun.batch_based_construction(detailed, obj){ |str| 
+          output << str 
+        }
+      end
     end
   end
 

@@ -18,23 +18,25 @@ Rails.application.routes.draw do
   #get 'programfordataset/:id' => 'datasets#programfordataset'
   #post 'updatedataset', :to => 'datasets#updatedataset', :as => 'updatedataset'
   #post 'datasetslice', :to => 'datasets#save_slice', :as => 'datasetslice'
-  get 'datasetsold/:id' => 'datasets#download'
-  get 'datasetsforgiving/:id' => 'datasets#downloadforgiving'
-  get 'downloaddetailed/:id' => 'datasets#downloaddetailed'
-  get 'downloaddetailedallattributes/:id' => 'datasets#downloaddetailedallattributes'
-  get 'downloadmultipass/:id' => 'datasets#downloadmultipass'
-  get 'downloadmultipassforgiving/:id' => 'datasets#downloadmultipassforgiving'
-  get 'downloaddetailedmultipass/:id' => 'datasets#downloaddetailedmultipass'
-  get 'datasets/runnostream/:id' => 'program_runs#download_run_old', :defaults => { :format => 'csv' }
-  get 'datasets/rundetailednostream/:id' => 'program_runs#download_run_detailed_old', :defaults => { :format => 'csv' }
+  #get 'datasetsold/:id' => 'datasets#download'
+  #get 'datasetsforgiving/:id' => 'datasets#downloadforgiving'
+  #get 'downloaddetailed/:id' => 'datasets#downloaddetailed'
+  #get 'downloaddetailedallattributes/:id' => 'datasets#downloaddetailedallattributes'
+  #get 'downloadmultipass/:id' => 'datasets#downloadmultipass'
+  #get 'downloadmultipassforgiving/:id' => 'datasets#downloadmultipassforgiving'
+  #get 'downloaddetailedmultipass/:id' => 'datasets#downloaddetailedmultipass'
+  #get 'datasets/runnostream/:id' => 'program_runs#download_run_old', :defaults => { :format => 'csv' }
+  #get 'datasets/rundetailednostream/:id' => 'program_runs#download_run_detailed_old', :defaults => { :format => 'csv' }
 
   post 'newprogramrun', :to => 'program_runs#new', :as => 'newprogramrun'
   post 'newprogramsubrun', :to => 'program_runs#new_sub_run', :as => 'newprogramsubrun'
   post 'updaterunname', :to => 'program_runs#update_run_name', :as => 'updaterunname'
   post 'datasetslice', :to => 'program_runs#save_slice', :as => 'datasetslice'
+  
+  # the current allowable ways to download
   get 'datasets/run/:id' => 'program_runs#download_run', :defaults => { :format => 'csv' }
   get 'datasets/rundetailed/:id' => 'program_runs#download_run_detailed', :defaults => { :format => 'csv' }
-  get 'datasets/:id' => 'program_runs#download_all', :defaults => { :format => 'csv' }
+  get 'datasets/:id' => 'program_runs#download_all_runs', :defaults => { :format => 'csv' }
 
   post 'saveprogram', :to => 'programs#save_program', :as => 'saveprogram'
 
