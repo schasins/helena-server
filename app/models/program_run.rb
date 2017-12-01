@@ -51,7 +51,7 @@ class ProgramRun < ActiveRecord::Base
 	      includes(:program_run, dataset_cells: [:dataset_value, :dataset_link]).
 	      order("program_runs.run_count ASC", program_sub_run_id: :asc, run_row_index: :asc). # need to also order by the prog run since we're collecting all the prog runs
 	      find_in_batches(batch_size: 500) do |group|
-
+                      group_rows_str = ""
 		      group.each { |row|	      
 			    currRow = []
 		        progRunObj = row.program_run
@@ -83,8 +83,10 @@ class ProgramRun < ActiveRecord::Base
 		          end
 
 				  # ok, we've put together the whole current row.  yield it so we can stream it
-		          yield CSV.generate_line(currRow) 
+		          #yield CSV.generate_line(currRow)
+                          group_rows_str << CSV.generate_line(currRow)
 			    }
+                  yield group_rows_str
 		  end
 	  end
 

@@ -129,7 +129,7 @@ class ProgramRunsController < ApplicationController
     response.status = 200
 
     #setting the body to an enumerator, rails will iterate this enumerator
-    self.response_body = csv_lines_(detailed, obj, all_runs)
+    self.response_body = csv_lines(detailed, obj, all_runs)
   end
 
   def set_file_headers(file_name)
