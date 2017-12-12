@@ -3,7 +3,13 @@ class ProgramsController < ApplicationController
   protect_from_forgery with: :null_session, :only =>[:save_program]
 
   def index
-    @programs = Program.all().select("name, id, updated_at")
+    tool_id = params[:tool_id]
+    puts tool_id
+    if (!tool_id || tool_id == "")
+      @programs = Program.all().select("name, id, updated_at, associated_string")
+    else
+      @programs = Program.where(tool_id: params[:tool_id]).select("name, id, updated_at, associated_string")
+    end
   end
 
   def show
@@ -31,9 +37,10 @@ class ProgramsController < ApplicationController
         # for now, if names are same, assume we should overwrite the old one
         program = programs[0]
         program.serialized_program = params[:serialized_program]
+        program.associated_string = params[:associated_string]
     else
         # if no saved program with the target id or if saved program didn't share name, need to make a fresh one
-      program = Program.create(params.permit(:serialized_program, :name))
+      program = Program.create(params.permit(:serialized_program, :name, :tool_id, :associated_string))
     end
     program.save_program_and_relations(relations)
 

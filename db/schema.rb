@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171030022939) do
+ActiveRecord::Schema.define(version: 20171206210729) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -136,7 +136,11 @@ ActiveRecord::Schema.define(version: 20171030022939) do
     t.text     "serialized_program"
     t.datetime "created_at",         null: false
     t.datetime "updated_at",         null: false
+    t.text     "associated_string"
+    t.integer  "tool_id"
   end
+
+  add_index "programs", ["tool_id"], name: "index_programs_on_tool_id", using: :btree
 
   create_table "relations", force: :cascade do |t|
     t.string   "name"
