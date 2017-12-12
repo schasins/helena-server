@@ -102,7 +102,7 @@ class ProgramRunsController < ApplicationController
     run = ProgramRun.find(params[:id])
     filename = run.gen_filename()+".csv"
     respond_to do |format|
-      format.csv {render_csv_helper(false, run, filename, false)}
+      format.csv {render_csv_helper(false, false, run, nil, filename)}
     end
   end
 
@@ -110,7 +110,7 @@ class ProgramRunsController < ApplicationController
     run = ProgramRun.find(params[:id])
     filename = run.gen_filename()+".csv"
     respond_to do |format|
-      format.csv {render_csv_helper(true, run, filename, false)}
+      format.csv {render_csv_helper(false, true, run, nil, filename)}
     end
   end
 
@@ -118,18 +118,18 @@ class ProgramRunsController < ApplicationController
     prog = Program.find(params[:id])
     filename = gen_filename_for_prog(prog)+".csv"
     respond_to do |format|
-      format.csv {render_csv_helper(false, prog, filename, true)}
+      format.csv {render_csv_helper(true, false, nil, prog, filename)}
     end
   end
 
-  def render_csv_helper(detailed, obj, filename, all_runs)
+  def render_csv_helper(allRuns, detailed, run, prog, filename)
     set_file_headers(filename)
     set_streaming_headers()
 
     response.status = 200
 
     #setting the body to an enumerator, rails will iterate this enumerator
-    self.response_body = csv_lines(detailed, obj, all_runs)
+    self.response_body = csv_lines(allRuns, detailed, run, prog)
   end
 
   def set_file_headers(file_name)
@@ -144,19 +144,11 @@ class ProgramRunsController < ApplicationController
     headers.delete("Content-Length")
   end
 
-  def csv_lines(detailed, obj, all_runs)
-    if (all_runs)
-      Enumerator.new do |output|
-        ProgramRun.all_runs_batch_based_construction(detailed, obj){ |str| 
-          output << str 
-        }
-      end
-    else
-      Enumerator.new do |output|
-        ProgramRun.batch_based_construction(detailed, obj){ |str| 
-          output << str 
-        }
-      end
+  def csv_lines(allRuns, detailed, run, prog)
+    Enumerator.new do |output|
+      ProgramRun.batch_based_construction(allRuns, detailed, run, prog){ |str| 
+        output << str 
+      }
     end
   end
 

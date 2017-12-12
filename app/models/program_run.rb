@@ -9,86 +9,74 @@ class ProgramRun < ActiveRecord::Base
 
 #--------------------
 
-	  def self.batch_based_construction(detailedRows, run, &block)
-        DatasetRow.where({program_run_id: run.id}).
-	      includes(dataset_cells: [:dataset_value, :dataset_link]).
-	      order(program_sub_run_id: :asc, run_row_index: :asc).
-	      find_in_batches(batch_size: 500) do |group|
+	def self.batch_based_construction(allRuns, detailedRows, run, program, &block)
 
-		      group.each { |row|	      
-			      currRow = []
+		# first let's grab the ids for all the rows we're going to show, so that we can break them down into batches
+		# (in order that we can stream the results to the user, to break up large download tasks)
+		row_ids = DatasetRow.select("id")
+		if (allRuns)
+			row_ids = row_ids.where({program_id: prog.id})
+				.includes(:program_run)
+				.order("program_runs.run_count ASC", program_sub_run_id: :asc, run_row_index: :asc) # need to also order by the prog run since we're collecting all the prog runs
+		else
+			row_ids = row_ids.where({program_run_id: run.id})
+				.order(program_sub_run_id: :asc, run_row_index: :asc)
+		end
 
-			      cells = row.dataset_cells.order(col: :asc)
-			      scraped_times = []
-			      cells.each{ |cell|
+		# ok, now we have all the row ids.  now break them into batches, do the actual processing
+		batch_size = 500
+		row_ids.each_slice(batch_size) do |row_ids|
 
-				      if (cell.scraped_attribute == Scraped::TEXT)
-				        currRow.push(cell.dataset_value.text)
-				  	  elsif (cell.scraped_attribute == Scraped::LINK)
-				        currRow.push(cell.dataset_link.link)
-				      else
-				        # for now, default to putting the text in
-				        currRow.push(cell.dataset_value.text)
-				      end
-				      if (detailedRows and cell.scraped_timestamp)
-				      	scraped_times.push(cell.scraped_timestamp)
-				      end
-		          }
-		          if (detailedRows)
-		          	currRow.push(scraped_times.max.to_i)
-		          end
+			# let's retrieve all the information we actually need about the current batch of rows
+			rows = DatasetRow.where(id: row_ids)
+						.includes(dataset_cells: [:dataset_value, :dataset_link])
+			if (allRuns)
+				rows = rows.order("program_runs.run_count ASC", program_sub_run_id: :asc, run_row_index: :asc)
+			else
+				rows = rows.order(program_sub_run_id: :asc, run_row_index: :asc)
+			end
 
-		          # ok, we've put together the whole current row.  yield it so we can stream it
-		          yield CSV.generate_line(currRow) 
-		      }
+			# now let's process each row
+			group_rows_str = ""
+			rows.each { |row|	      
+				currRow = []
+				progRunObj = row.program_run
+				currentProgRunCounter = progRunObj.run_count
 
-	    end
-	  end
+				cells = row.dataset_cells.order(col: :asc)
+				scraped_times = []
+				cells.each{ |cell|
 
-	  def self.all_runs_batch_based_construction(detailedRows, prog, &block)
-	    DatasetRow.
-	      where({program_id: prog.id}).
-	      includes(:program_run, dataset_cells: [:dataset_value, :dataset_link]).
-	      order("program_runs.run_count ASC", program_sub_run_id: :asc, run_row_index: :asc). # need to also order by the prog run since we're collecting all the prog runs
-	      find_in_batches(batch_size: 500) do |group|
-                      group_rows_str = ""
-		      group.each { |row|	      
-			    currRow = []
-		        progRunObj = row.program_run
-		        currentProgRunCounter = progRunObj.run_count
+					if (cell.scraped_attribute == Scraped::TEXT)
+						currRow.push(cell.dataset_value.text)
+					elsif (cell.scraped_attribute == Scraped::LINK)
+						currRow.push(cell.dataset_link.link)
+					else
+						# for now, default to putting the text in
+						currRow.push(cell.dataset_value.text)
+					end
+					if (detailedRows and cell.scraped_timestamp)
+						scraped_times.push(cell.scraped_timestamp)
+					end
+				}
 
-				  cells = row.dataset_cells.order(col: :asc)
-			      scraped_times = []
-				  cells.each{ |cell|
+				if (allRuns)
+					# and at the end of the row, go ahead and add the program_run_id to let the user know which pass produced the row
+					currRow.push(currentProgRunCounter)
+				end
 
-					  if (cell.scraped_attribute == Scraped::TEXT)
-					    currRow.push(cell.dataset_value.text)
-					  elsif (cell.scraped_attribute == Scraped::LINK)
-					    currRow.push(cell.dataset_link.link)
-					  else
-					    # for now, default to putting the text in
-					    currRow.push(cell.dataset_value.text)
-					  end
-				      if (detailedRows and cell.scraped_timestamp)
-				      	scraped_times.push(cell.scraped_timestamp)
-				      end
-				    
-				  }
+				if (detailedRows)
+				currRow.push(scraped_times.max.to_i)
+				end
 
-		          # and at the end of the row, go ahead and add the program_run_id to let the user know which pass produced the row
-      			  currRow.push(currentProgRunCounter)
+				# ok, we've put together the whole current row.  add it to our accumulator
+				group_rows_str << CSV.generate_line(currRow)
+			}
+			# now that we've finished processing the group, yield the accumulator
+			yield group_rows_str
+		end
 
-		          if (detailedRows)
-		          	currRow.push(scraped_times.max.to_i)
-		          end
-
-				  # ok, we've put together the whole current row.  yield it so we can stream it
-		          #yield CSV.generate_line(currRow)
-                          group_rows_str << CSV.generate_line(currRow)
-			    }
-                  yield group_rows_str
-		  end
-	  end
+	end
 
 #--------------------
 
