@@ -13,11 +13,10 @@ class ProgramRun < ActiveRecord::Base
 
 		# first let's grab the ids for all the rows we're going to show, so that we can break them down into batches
 		# (in order that we can stream the results to the user, to break up large download tasks)
-		row_ids = DatasetRow.select("id")
+		row_ids = DatasetRow.select(:id)
 		if (allRuns)
-			row_ids = row_ids.where({program_id: prog.id})
-				.includes(:program_run)
-				.order("program_runs.run_count ASC", program_sub_run_id: :asc, run_row_index: :asc) # need to also order by the prog run since we're collecting all the prog runs
+			row_ids = row_ids.where({program_id: program.id})
+				.order(program_run_id: :asc, program_sub_run_id: :asc, run_row_index: :asc) # need to also order by the prog run since we're collecting all the prog runs
 		else
 			row_ids = row_ids.where({program_run_id: run.id})
 				.order(program_sub_run_id: :asc, run_row_index: :asc)
@@ -29,9 +28,9 @@ class ProgramRun < ActiveRecord::Base
 
 			# let's retrieve all the information we actually need about the current batch of rows
 			rows = DatasetRow.where(id: row_ids)
-						.includes(dataset_cells: [:dataset_value, :dataset_link])
+						.includes(:program_run, dataset_cells: [:dataset_value, :dataset_link])
 			if (allRuns)
-				rows = rows.order("program_runs.run_count ASC", program_sub_run_id: :asc, run_row_index: :asc)
+				rows = rows.order(program_run_id: :asc, program_sub_run_id: :asc, run_row_index: :asc)
 			else
 				rows = rows.order(program_sub_run_id: :asc, run_row_index: :asc)
 			end
