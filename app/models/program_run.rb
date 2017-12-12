@@ -22,7 +22,8 @@ class ProgramRun < ActiveRecord::Base
 				.order(program_sub_run_id: :asc, run_row_index: :asc)
 		end
 		if (timeLimitInHours)
-			row_ids = row_ids.where('created_at > ?', DateTime.now.AddHours(-1 * timeLimitInHours))
+                  adjusted_datetime = (DateTime.now.to_time - (timeLimitInHours.to_i).hours).to_datetime
+			row_ids = row_ids.where('created_at > ?', adjusted_datetime)
 		end
 
 		# ok, now we have all the row ids.  now break them into batches, do the actual processing
