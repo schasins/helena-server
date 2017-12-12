@@ -9,7 +9,7 @@ class ProgramRun < ActiveRecord::Base
 
 #--------------------
 
-	def self.batch_based_construction(allRuns, detailedRows, run, program, &block)
+	def self.batch_based_construction(allRuns, detailedRows, run, program, timeLimitInHours, &block)
 
 		# first let's grab the ids for all the rows we're going to show, so that we can break them down into batches
 		# (in order that we can stream the results to the user, to break up large download tasks)
@@ -20,6 +20,9 @@ class ProgramRun < ActiveRecord::Base
 		else
 			row_ids = row_ids.where({program_run_id: run.id})
 				.order(program_sub_run_id: :asc, run_row_index: :asc)
+		end
+		if (timeLimitInHours)
+			row_ids = row_ids.where('created_at > ?', DateTime.now.AddHours(-1 * timeLimitInHours))
 		end
 
 		# ok, now we have all the row ids.  now break them into batches, do the actual processing

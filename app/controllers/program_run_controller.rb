@@ -116,20 +116,24 @@ class ProgramRunsController < ApplicationController
 
   def download_all_runs
     prog = Program.find(params[:id])
+    timeLimit = nil
+    if (params[:hours])
+      timeLimit = params[:hours]
+    end
     filename = gen_filename_for_prog(prog)+".csv"
     respond_to do |format|
-      format.csv {render_csv_helper(true, false, nil, prog, filename)}
+      format.csv {render_csv_helper(true, false, nil, prog, filename, timeLimit)}
     end
   end
 
-  def render_csv_helper(allRuns, detailed, run, prog, filename)
+  def render_csv_helper(allRuns, detailed, run, prog, filename, timeLimit = nil)
     set_file_headers(filename)
     set_streaming_headers()
 
     response.status = 200
 
     #setting the body to an enumerator, rails will iterate this enumerator
-    self.response_body = csv_lines(allRuns, detailed, run, prog)
+    self.response_body = csv_lines(allRuns, detailed, run, prog, timeLimit)
   end
 
   def set_file_headers(file_name)
@@ -144,9 +148,9 @@ class ProgramRunsController < ApplicationController
     headers.delete("Content-Length")
   end
 
-  def csv_lines(allRuns, detailed, run, prog)
+  def csv_lines(allRuns, detailed, run, prog, timeLimit = nil)
     Enumerator.new do |output|
-      ProgramRun.batch_based_construction(allRuns, detailed, run, prog){ |str| 
+      ProgramRun.batch_based_construction(allRuns, detailed, run, prog, timeLimit){ |str| 
         output << str 
       }
     end

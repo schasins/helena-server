@@ -37,6 +37,7 @@ Rails.application.routes.draw do
   get 'datasets/run/:id' => 'program_runs#download_run', :defaults => { :format => 'csv' }
   get 'datasets/rundetailed/:id' => 'program_runs#download_run_detailed', :defaults => { :format => 'csv' }
   get 'datasets/:id' => 'program_runs#download_all_runs', :defaults => { :format => 'csv' }
+  get 'datasets/:id/:hours' => 'program_runs#download_all_runs', :defaults => { :format => 'csv' }
 
   post 'saveprogram', :to => 'programs#save_program', :as => 'saveprogram'
 
