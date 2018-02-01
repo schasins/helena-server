@@ -12,7 +12,16 @@ class TransactionLocksController < ApplicationController
     exists = TransactionLock.exists(params)
     # for the exists case, we just tell the user that it already exists
     if (exists)
-      render json: { task_yours: false } # this thread shouldn't do this task
+      render json: { task_yours: false } # this worker shouldn't do this task
+      return
+    end
+
+    # ok, it's also possible that even though there's no lock on it, it's been done in the past and skip block means we should skip
+    # remember, we will only ever even contact the server if we have an active skip block (one that doesn't have the NEVER skip strategy on)
+    # so we're not getting here unless we really do want to skip tasks where the record already exists
+    exists = TransactionRecord.exists(params)
+    if (exists)
+      render json: { task_yours: false }
       return
     end
 
@@ -25,7 +34,7 @@ class TransactionLocksController < ApplicationController
     rescue ActiveRecord::RecordInvalid => invalid
        # handle failure here
        # remember that we require unique (program_id, program_run_id, annotation_id, transaction_items_str) tuple
-      render json: { task_yours: false } # this thread shouldn't do this task because failure means someone else already claimed it
+      render json: { task_yours: false } # this worker shouldn't do this task because failure means someone else already claimed it
     end
   end
 
