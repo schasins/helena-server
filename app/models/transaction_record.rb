@@ -54,20 +54,25 @@ class TransactionRecord < ActiveRecord::Base
 	      threshold_time = Time.now - physical_time_diff_seconds
 	      transaction_query = transaction_query.where("commit_time > ?", threshold_time)
 	    elsif (logical_time_diff)
-	      # use program run (logical time)
-	      logical_time_diff = logical_time_diff.to_i
-	      # ok, for this we need to figure out what program runs we've done for the program.
-	      # if logical_time_diff is 2, we're allowed to skip if we've seen a duplicate in the last two runs
-	      # that is, this run plus either of the last 2
-	      runs = ProgramRun.where(program_id: program_id).order(created_at: :desc)
-	      if (runs.size < (logical_time_diff + 1))
-	        # don't actually need to do any filtering.  the whole history of the executions falls in our target range
-	      else
-	        # if the logical_time_diff is 2, we'll skip if we see duplicates in the curr run or prior 2, so we're
-	        # interested in the set of transaction records made after the the time when the third prog run in runs was created
-	        threshold_time = runs[logical_time_diff].created_at
-	        transaction_query = transaction_query.where("commit_time > ?", threshold_time)
-	      end
+			# use program run (logical time)
+			logical_time_diff = logical_time_diff.to_i
+			# ok, for this we need to figure out what program runs we've done for the program.
+			# if logical_time_diff is 2, we're allowed to skip if we've seen a duplicate in the last two runs
+			# that is, this run plus either of the last 2
+			our_run = ProgramRun.find(program_run_id)
+			our_run_start_time = our_run.created_at
+			run_ids = ProgramRun.where(program_id: program_id).where("created_at <= ?", our_run_start_time)
+								.order(created_at: :desc).limit(logical_time_diff + 1).pluck(:id)
+			# now remember, we could be in 1 run but with a new run having started after us.  
+			# cut off any runs that were made after our own program_run_id
+			# that's why we have the created_at <= bit above
+
+			# if the logical_time_diff is 2, we'll skip if we see duplicates in the curr run or prior 2, so we're
+			# interested in the set of transaction records made with those run ids
+			# rembmer, we can have concurrent runs.  so it's not ok to just use the time at which a run was created
+			# have to use the actual run ids (example, we only want things from the last 0 runs -- that is, from the
+			# current run, but there are two runs running at once -- we don't want to skip items scraped by the other run)
+			transaction_query = transaction_query.where({ program_run_id: run_ids})
 	    end
 
 	    # ok, now let's go through and mention all the cells that need to be associated with the record
