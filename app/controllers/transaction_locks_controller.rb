@@ -26,16 +26,17 @@ class TransactionLocksController < ApplicationController
     end
 
     # for the not exists case, we want to make the lock record.  but only if no one else got it first
-    begin
-      transaction = TransactionLock.transaction_saving_internals(params)
+    transaction = TransactionLock.transaction_saving_internals(params)
+    if (transaction.id != nil)
       # handle success here
       render json: { task_yours: true, transaction_lock_id: transaction.id }
-      return
-    rescue ActiveRecord::RecordInvalid => invalid
-       # handle failure here
-       # remember that we require unique (program_id, program_run_id, annotation_id, transaction_items_str) tuple
+    else
+      # if we tried to make it but then rolled back, we'd see a weird transactionlock record with id set to nil
+      # handle failure here
+      # remember that we require unique (program_id, program_run_id, annotation_id, transaction_items_str) tuple
       render json: { task_yours: false } # this worker shouldn't do this task because failure means someone else already claimed it
     end
+    return
   end
 
   
