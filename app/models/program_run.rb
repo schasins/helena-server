@@ -69,6 +69,8 @@ class ProgramRun < ActiveRecord::Base
 				end
 
 				if (detailedRows)
+                                  currRow.push(row.program_run_id)
+                                  currRow.push(row.program_sub_run_id)
 				currRow.push(scraped_times.max.to_i)
 				end
 
