@@ -39,5 +39,21 @@ class TransactionLocksController < ApplicationController
     return
   end
 
+  def take_during_descending_phase
+    lockExists = TransactionLock.exists(params)
+    # ok, we're interested in whether there was a commit *in this run*
+    # so let's change the params to reflect that that's the kind of commit we care about
+    params[:physical_time_diff_seconds] = nil
+    params[:logical_time_diff] = 0 # logical time diff because we're only interested in commits from the same run
+    commitExists = TransactionRecord.exists(params)
+    # we only want to descend if the lock is still held, and we always want to descend if the lock is still held
+    if (lockExists and not commitExists)
+      render json: { task_yours: true } # the lock exists, but commit doesn't, so it's still open
+      return
+    end
+    render json: { task_yours: false } # this worker shouldn't do this task
+    return
+  end
+
   
 end

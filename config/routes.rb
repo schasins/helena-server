@@ -45,6 +45,7 @@ Rails.application.routes.draw do
   post 'newtransactionwithdata', :to => 'transaction_records#new_with_dataset_slice', :as => 'newtransactionwithdata'
   post 'transactionexists', :to => 'transaction_records#exists', :as => 'transactionexists'
   post 'locktransaction', :to => 'transaction_locks#make_if_not_exists', :as => 'locktransaction'
+  post 'takeblockduringdescent', :to => 'transaction_locks#take_during_descending_phase', :as => 'takeblockduringdescent'
 
   resources :relations
   resources :columns
