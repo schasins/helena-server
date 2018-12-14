@@ -6,9 +6,9 @@ class ProgramsController < ApplicationController
     tool_id = params[:tool_id]
     puts tool_id
     if (!tool_id || tool_id == "")
-      @programs = Program.all().select("name, id, updated_at, associated_string")
+      @programs = Program.all().select("name, id, updated_at, associated_string").order(updated_at: :desc)
     else
-      @programs = Program.where(tool_id: params[:tool_id]).select("name, id, updated_at, associated_string")
+      @programs = Program.where(tool_id: params[:tool_id]).select("name, id, updated_at, associated_string").order(updated_at: :desc)
     end
   end
 
