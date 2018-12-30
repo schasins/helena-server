@@ -49,7 +49,9 @@ class ProgramRun < ActiveRecord::Base
 			# let's retrieve all the information we actually need about the current batch of rows
 			rows = DatasetRow.where(id: row_ids)
 						.includes(:program_run, dataset_cells: [:dataset_value, :dataset_link])
-			if (allRuns)
+			if (rowLimit)
+				rows = rows.order(created_at: :desc) # remember this order must match the order above
+			elsif (allRuns)
 				rows = rows.order(program_run_id: :asc, program_sub_run_id: :asc, run_row_index: :asc)
 			else
 				rows = rows.order(program_sub_run_id: :asc, run_row_index: :asc)
