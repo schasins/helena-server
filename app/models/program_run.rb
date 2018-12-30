@@ -27,7 +27,7 @@ class ProgramRun < ActiveRecord::Base
 		# otherwise, let's order them by run, then subrun (parallel worker), then row index
 		# (to group rows that came from the same parallel worker)
 		if (rowLimit)
-			row_ids = row_ids.order(created_at: :asc).limit(rowLimit)
+			row_ids = row_ids.order(created_at: :desc).limit(rowLimit) # the only one where it's *descending*!
 		elsif (allRuns)
 			# need to also order by the prog run since we're collecting all the prog runs
 			row_ids = row_ids.order(program_run_id: :asc, program_sub_run_id: :asc, run_row_index: :asc) 
