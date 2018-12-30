@@ -102,7 +102,7 @@ class ProgramRunsController < ApplicationController
     run = ProgramRun.find(params[:id])
     filename = run.gen_filename()+".csv"
     respond_to do |format|
-      format.csv {render_csv_helper(false, false, run, nil, filename)}
+      format.csv {render_csv_helper(false, false, run, nil, filename, nil, nil)}
     end
   end
 
@@ -110,30 +110,34 @@ class ProgramRunsController < ApplicationController
     run = ProgramRun.find(params[:id])
     filename = run.gen_filename()+".csv"
     respond_to do |format|
-      format.csv {render_csv_helper(false, true, run, nil, filename)}
+      format.csv {render_csv_helper(false, true, run, nil, filename, nil, nil)}
     end
   end
 
   def download_all_runs
     prog = Program.find(params[:id])
     timeLimit = nil
+    rowLimit = nil
     if (params[:hours])
       timeLimit = params[:hours]
+    elsif (params[:rows])
+      # for now you can have a time limit or a row limit, but not both; todo: do we want both?
+      rowLimit = params[:rows]
     end
     filename = gen_filename_for_prog(prog)+".csv"
     respond_to do |format|
-      format.csv {render_csv_helper(true, false, nil, prog, filename, timeLimit)}
+      format.csv {render_csv_helper(true, false, nil, prog, filename, timeLimit, rowLimit)}
     end
   end
 
-  def render_csv_helper(allRuns, detailed, run, prog, filename, timeLimit = nil)
+  def render_csv_helper(allRuns, detailed, run, prog, filename, timeLimit = nil, rowLimit = nil)
     set_file_headers(filename)
     set_streaming_headers()
 
     response.status = 200
 
-    #setting the body to an enumerator, rails will iterate this enumerator
-    self.response_body = csv_lines(allRuns, detailed, run, prog, timeLimit)
+    # setting the body to an enumerator, rails will iterate this enumerator
+    self.response_body = csv_lines(allRuns, detailed, run, prog, timeLimit, rowLimit)
   end
 
   def set_file_headers(file_name)
@@ -148,9 +152,9 @@ class ProgramRunsController < ApplicationController
     headers.delete("Content-Length")
   end
 
-  def csv_lines(allRuns, detailed, run, prog, timeLimit = nil)
+  def csv_lines(allRuns, detailed, run, prog, timeLimit = nil, rowLimit = nil)
     Enumerator.new do |output|
-      ProgramRun.batch_based_construction(allRuns, detailed, run, prog, timeLimit){ |str| 
+      ProgramRun.batch_based_construction(allRuns, detailed, run, prog, timeLimit, rowLimit){ |str| 
         output << str 
       }
     end

@@ -9,20 +9,36 @@ class ProgramRun < ActiveRecord::Base
 
 #--------------------
 
-	def self.batch_based_construction(allRuns, detailedRows, run, program, timeLimitInHours, &block)
+	def self.batch_based_construction(allRuns, detailedRows, run, program, timeLimitInHours, rowLimit, &block)
 
 		# first let's grab the ids for all the rows we're going to show, so that we can break them down into batches
 		# (in order that we can stream the results to the user, to break up large download tasks)
 		row_ids = DatasetRow.select(:id)
+
+		# let's get the basics.  what kind of row do we want in the first place?  all runs?  one run?
 		if (allRuns)
 			row_ids = row_ids.where({program_id: program.id})
-				.order(program_run_id: :asc, program_sub_run_id: :asc, run_row_index: :asc) # need to also order by the prog run since we're collecting all the prog runs
 		else
 			row_ids = row_ids.where({program_run_id: run.id})
-				.order(program_sub_run_id: :asc, run_row_index: :asc)
 		end
+
+		# and how should we order them?  if we're limiting to the most recent rows, we'll want to order by time added
+		# (to grab only the most recent x rows)
+		# otherwise, let's order them by run, then subrun (parallel worker), then row index
+		# (to group rows that came from the same parallel worker)
+		if (rowLimit)
+			row_ids = row_ids.order(created_at: :asc).limit(rowLimit)
+		elsif (allRuns)
+			# need to also order by the prog run since we're collecting all the prog runs
+			row_ids = row_ids.order(program_run_id: :asc, program_sub_run_id: :asc, run_row_index: :asc) 
+		else
+			# there's no limit and it's just one run, so...
+			row_ids = row_ids.order(program_sub_run_id: :asc, run_row_index: :asc)
+		end
+
+
 		if (timeLimitInHours)
-                  adjusted_datetime = (DateTime.now.to_time - (timeLimitInHours.to_i).hours).to_datetime
+            adjusted_datetime = (DateTime.now.to_time - (timeLimitInHours.to_i).hours).to_datetime
 			row_ids = row_ids.where('created_at > ?', adjusted_datetime)
 		end
 
