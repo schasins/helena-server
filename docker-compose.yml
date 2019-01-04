@@ -1,0 +1,41 @@
+version: '3.2'
+
+services:
+  db:
+    image: postgres:9.4
+    # These parameters are optimized for loading a large database archive. They should be modified after the database is loaded.
+    # https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/PostgreSQL.Procedural.Importing.html
+    # https://www.postgresql.org/docs/current/populate.html
+    # http://www.databasesoup.com/2014/09/settings-for-fast-pgrestore.html
+    # command: postgres -c maintenance_work_mem=1GB -c fsync=off -c synchronous_commit=off -c wal_level=minimal -c full_page_writes=off -c wal_buffers=64MB -c checkpoint_segments=256 -c max_wal_senders=0 -c wal_keep_segments=0 -c archive_mode=off -c autovacuum=off -c logging_collector=on -c log_destination=stderr -c log_directory=/logs
+    command: postgres -c maintenance_work_mem=1GB -c fsync=off -c synchronous_commit=off -c wal_level=minimal -c full_page_writes=off -c wal_buffers=64MB -c checkpoint_segments=256 -c max_wal_senders=0 -c wal_keep_segments=0 -c archive_mode=off -c autovacuum=off
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      # Persist the data between container invocations
+      # - type: volume
+      #   source: db_data
+      #   target: /var/lib/postgresql/data
+      - type: bind
+        source: /tmp/helena-postgres/logs
+        target: /logs
+      - type: bind
+        source: /tmp/helena-postgres/data
+        target: /var/lib/postgresql/data
+      - type: bind
+        source: /tmp/helena-postgres/backup
+        target: /backup
+  web:
+    build: .
+    command: bundle exec rails s -e production -p 3000 -b '0.0.0.0'
+    ports:
+      - "3000:3000"
+    environment:
+      - SECRET_KEY_BASE
+      - HELENA_SERVER_DATABASE_HOST
+      - HELENA_SERVER_DATABASE_PASSWORD
+    depends_on:
+      - db
+
+# volumes:
+#   db_data:

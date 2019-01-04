@@ -28,8 +28,6 @@ gem 'rails_12factor', group: :production
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 
-gem "passenger", ">= 5.0.25", require: "phusion_passenger/rack_handler"
-
 # Use Unicorn as the app server
 # gem 'unicorn'
 
@@ -39,6 +37,8 @@ gem "passenger", ">= 5.0.25", require: "phusion_passenger/rack_handler"
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'byebug'
+  # This causes problems on Elastic Beanstalk since Passenger is built-in, so remove from production
+  gem "passenger", ">= 5.0.25", require: "phusion_passenger/rack_handler"
 end
 
 group :development do

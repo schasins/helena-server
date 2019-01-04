@@ -13,4 +13,7 @@
 /tmp
 
 # don't put the database stuff in there
-config/database.yml
+# config/database.yml
+
+# Ignore Docker local evironment.
+/.env
