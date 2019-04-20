@@ -11,92 +11,95 @@ class ProgramRun < ActiveRecord::Base
 
 	def self.batch_based_construction(allRuns, detailedRows, run, program, timeLimitInHours, rowLimit, &block)
 
-		# first let's grab the ids for all the rows we're going to show, so that we can break them down into batches
-		# (in order that we can stream the results to the user, to break up large download tasks)
-		row_ids = DatasetRow.select(:id)
+		uncached do
 
-		# let's get the basics.  what kind of row do we want in the first place?  all runs?  one run?
-		if (allRuns)
-			row_ids = row_ids.where({program_id: program.id})
-		else
-			row_ids = row_ids.where({program_run_id: run.id})
-		end
+			# first let's grab the ids for all the rows we're going to show, so that we can break them down into batches
+			# (in order that we can stream the results to the user, to break up large download tasks)
+			row_ids = DatasetRow.select(:id)
 
-		# and how should we order them?  if we're limiting to the most recent rows, we'll want to order by time added
-		# (to grab only the most recent x rows)
-		# otherwise, let's order them by run, then subrun (parallel worker), then row index
-		# (to group rows that came from the same parallel worker)
-		if (rowLimit)
-			row_ids = row_ids.order(created_at: :desc).limit(rowLimit) # the only one where it's *descending*!
-		elsif (allRuns)
-			# need to also order by the prog run since we're collecting all the prog runs
-			row_ids = row_ids.order(program_run_id: :asc, program_sub_run_id: :asc, run_row_index: :asc) 
-		else
-			# there's no limit and it's just one run, so...
-			row_ids = row_ids.order(program_sub_run_id: :asc, run_row_index: :asc)
-		end
-
-
-		if (timeLimitInHours)
-            adjusted_datetime = (DateTime.now.to_time - (timeLimitInHours.to_i).hours).to_datetime
-			row_ids = row_ids.where('created_at > ?', adjusted_datetime)
-		end
-
-		# ok, now we have all the row ids.  now break them into batches, do the actual processing
-		batch_size = 500
-		row_ids.each_slice(batch_size) do |row_ids|
-
-			# let's retrieve all the information we actually need about the current batch of rows
-			rows = DatasetRow.where(id: row_ids)
-						.includes(:program_run, dataset_cells: [:dataset_value, :dataset_link])
-			if (rowLimit)
-				rows = rows.order(created_at: :desc) # remember this order must match the order above
-			elsif (allRuns)
-				rows = rows.order(program_run_id: :asc, program_sub_run_id: :asc, run_row_index: :asc)
+			# let's get the basics.  what kind of row do we want in the first place?  all runs?  one run?
+			if (allRuns)
+				row_ids = row_ids.where({program_id: program.id})
 			else
-				rows = rows.order(program_sub_run_id: :asc, run_row_index: :asc)
+				row_ids = row_ids.where({program_run_id: run.id})
 			end
 
-			# now let's process each row
-			group_rows_str = ""
-			rows.each { |row|	      
-				currRow = []
-				progRunObj = row.program_run
-				currentProgRunCounter = progRunObj.run_count
+			# and how should we order them?  if we're limiting to the most recent rows, we'll want to order by time added
+			# (to grab only the most recent x rows)
+			# otherwise, let's order them by run, then subrun (parallel worker), then row index
+			# (to group rows that came from the same parallel worker)
+			if (rowLimit)
+				row_ids = row_ids.order(created_at: :desc).limit(rowLimit) # the only one where it's *descending*!
+			elsif (allRuns)
+				# need to also order by the prog run since we're collecting all the prog runs
+				row_ids = row_ids.order(program_run_id: :asc, program_sub_run_id: :asc, run_row_index: :asc)
+			else
+				# there's no limit and it's just one run, so...
+				row_ids = row_ids.order(program_sub_run_id: :asc, run_row_index: :asc)
+			end
 
-				cells = row.dataset_cells.order(col: :asc)
-				scraped_times = []
-				cells.each{ |cell|
 
-					if (cell.scraped_attribute == Scraped::TEXT)
-						currRow.push(cell.dataset_value.text)
-					elsif (cell.scraped_attribute == Scraped::LINK)
-						currRow.push(cell.dataset_link.link)
-					else
-						# for now, default to putting the text in
-						currRow.push(cell.dataset_value.text)
+			if (timeLimitInHours)
+	            adjusted_datetime = (DateTime.now.to_time - (timeLimitInHours.to_i).hours).to_datetime
+				row_ids = row_ids.where('created_at > ?', adjusted_datetime)
+			end
+
+			# ok, now we have all the row ids.  now break them into batches, do the actual processing
+			batch_size = 500
+			row_ids.each_slice(batch_size) do |row_ids|
+
+				# let's retrieve all the information we actually need about the current batch of rows
+				rows = DatasetRow.where(id: row_ids)
+							.includes(:program_run, dataset_cells: [:dataset_value, :dataset_link])
+				if (rowLimit)
+					rows = rows.order(created_at: :desc) # remember this order must match the order above
+				elsif (allRuns)
+					rows = rows.order(program_run_id: :asc, program_sub_run_id: :asc, run_row_index: :asc)
+				else
+					rows = rows.order(program_sub_run_id: :asc, run_row_index: :asc)
+				end
+
+				# now let's process each row
+				group_rows_str = ""
+				rows.each { |row|
+					currRow = []
+					progRunObj = row.program_run
+					currentProgRunCounter = progRunObj.run_count
+
+					cells = row.dataset_cells.order(col: :asc)
+					scraped_times = []
+					cells.each{ |cell|
+
+						if (cell.scraped_attribute == Scraped::TEXT)
+							currRow.push(cell.dataset_value.text)
+						elsif (cell.scraped_attribute == Scraped::LINK)
+							currRow.push(cell.dataset_link.link)
+						else
+							# for now, default to putting the text in
+							currRow.push(cell.dataset_value.text)
+						end
+						if (detailedRows and cell.scraped_timestamp)
+							scraped_times.push(cell.scraped_timestamp)
+						end
+					}
+
+					if (allRuns)
+						# and at the end of the row, go ahead and add the program_run_id to let the user know which pass produced the row
+						currRow.push(currentProgRunCounter)
 					end
-					if (detailedRows and cell.scraped_timestamp)
-						scraped_times.push(cell.scraped_timestamp)
+
+					if (detailedRows)
+	                                  currRow.push(row.program_run_id)
+	                                  currRow.push(row.program_sub_run_id)
+					currRow.push(scraped_times.max.to_i)
 					end
+
+					# ok, we've put together the whole current row.  add it to our accumulator
+					group_rows_str << CSV.generate_line(currRow)
 				}
-
-				if (allRuns)
-					# and at the end of the row, go ahead and add the program_run_id to let the user know which pass produced the row
-					currRow.push(currentProgRunCounter)
-				end
-
-				if (detailedRows)
-                                  currRow.push(row.program_run_id)
-                                  currRow.push(row.program_sub_run_id)
-				currRow.push(scraped_times.max.to_i)
-				end
-
-				# ok, we've put together the whole current row.  add it to our accumulator
-				group_rows_str << CSV.generate_line(currRow)
-			}
-			# now that we've finished processing the group, yield the accumulator
-			yield group_rows_str
+				# now that we've finished processing the group, yield the accumulator
+				yield group_rows_str
+			end
 		end
 
 	end
@@ -162,9 +165,9 @@ class ProgramRun < ActiveRecord::Base
 	        nodes = JSON.parse(URI.decode(params[:nodes]))
 	        positionLists = JSON.parse(params[:position_lists])
 	        index = -1
-            
+
 		  	nodes.each{ |node|
-                
+
 		        index += 1
 		        text = node["text"]
 		        link = node["link"]
@@ -187,8 +190,8 @@ class ProgramRun < ActiveRecord::Base
 		        top_frame_source_url_object = Url.find_or_make(top_frame_source_url)
 		  		positionLists[index].each{ |coords|
 		  			parameters = {
-	            	dataset_value_id: text_object.id, 
-	            	dataset_link_id: link_object.id, 
+	            	dataset_value_id: text_object.id,
+	            	dataset_link_id: link_object.id,
 	            	scraped_attribute: scraped_attribute_num,
 	                scraped_timestamp: date,
 	            	source_url_id: source_url_object.id,
