@@ -59,8 +59,8 @@ ActiveRecord::Schema.define(version: 20171206210729) do
   add_index "dataset_links", ["link"], name: "index_dataset_links_on_link", unique: true, using: :btree
 
   create_table "dataset_row_dataset_cell_relationships", force: :cascade do |t|
-    t.integer  "dataset_row_id"
-    t.integer  "dataset_cell_id"
+    t.integer  "dataset_row_id",  null: false
+    t.integer  "dataset_cell_id", null: false
     t.datetime "created_at",      null: false
     t.datetime "updated_at",      null: false
   end
@@ -68,9 +68,9 @@ ActiveRecord::Schema.define(version: 20171206210729) do
   add_index "dataset_row_dataset_cell_relationships", ["dataset_row_id"], name: "index_dataset_row_dataset_cell_relationships_on_dataset_row_id", using: :btree
 
   create_table "dataset_rows", force: :cascade do |t|
-    t.integer  "program_id"
-    t.integer  "program_run_id"
-    t.integer  "program_sub_run_id"
+    t.integer  "program_id",         null: false
+    t.integer  "program_run_id",     null: false
+    t.integer  "program_sub_run_id", null: false
     t.integer  "run_row_index"
     t.datetime "created_at",         null: false
     t.datetime "updated_at",         null: false
@@ -107,7 +107,7 @@ ActiveRecord::Schema.define(version: 20171206210729) do
 
   create_table "program_runs", force: :cascade do |t|
     t.string   "name"
-    t.integer  "program_id"
+    t.integer  "program_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer  "run_count"
@@ -116,14 +116,14 @@ ActiveRecord::Schema.define(version: 20171206210729) do
   add_index "program_runs", ["program_id"], name: "index_program_runs_on_program_id", using: :btree
 
   create_table "program_sub_runs", force: :cascade do |t|
-    t.integer  "program_run_id"
+    t.integer  "program_run_id", null: false
     t.datetime "created_at",     null: false
     t.datetime "updated_at",     null: false
   end
 
   create_table "program_uses_relations", force: :cascade do |t|
-    t.integer  "program_id"
-    t.integer  "relation_id"
+    t.integer  "program_id",  null: false
+    t.integer  "relation_id", null: false
     t.datetime "created_at",  null: false
     t.datetime "updated_at",  null: false
   end
@@ -172,8 +172,8 @@ ActiveRecord::Schema.define(version: 20171206210729) do
   add_index "transaction_cells", ["transaction_record_id"], name: "index_transaction_cells_on_transaction_record_id", using: :btree
 
   create_table "transaction_locks", force: :cascade do |t|
-    t.integer "program_id"
-    t.integer "program_run_id"
+    t.integer "program_id",     null: false
+    t.integer "program_run_id", null: false
     t.integer "annotation_id"
     t.text    "transaction_items_str"
   end
@@ -185,8 +185,8 @@ ActiveRecord::Schema.define(version: 20171206210729) do
     t.datetime "created_at",     null: false
     t.datetime "updated_at",     null: false
     t.integer  "annotation_id"
-    t.integer  "program_id"
-    t.integer  "program_run_id"
+    t.integer  "program_id",     null: false
+    t.integer  "program_run_id", null: false
     t.datetime "commit_time"
     t.boolean  "finished"
   end
