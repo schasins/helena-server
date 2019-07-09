@@ -1,7 +1,7 @@
 class RelationsController < ApplicationController
 
-	skip_before_action :protect_from_forgery, :only =>[:save_relation] # save_relation is going to be coming from the Chrome extension, so can't get the CSRF token.  in future should consider whether we should require some kind of authentication for this
-	protect_from_forgery with: :null_session, :only =>[:save_relation]
+	# save_relation is going to be coming from the Chrome extension, so can't get the CSRF token.  in future should consider whether we should require some kind of authentication for this
+	protect_from_forgery with: :null_session, :only =>[:save_relation], raise: false
 
   def index
     @relations = Relation.all

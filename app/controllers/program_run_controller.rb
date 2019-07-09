@@ -2,8 +2,8 @@ class ProgramRunsController < ApplicationController
 
 	require 'csv'
 
-	skip_before_action :protect_from_forgery, :only =>[:new] # save_relation is going to be coming from the Chrome extension, so can't get the CSRF token.  in future should consider whether we should require some kind of authentication for this
-	protect_from_forgery with: :null_session, :only =>[:new]
+	# new is going to be coming from the Chrome extension, so can't get the CSRF token.  in future should consider whether we should require some kind of authentication for this
+	protect_from_forgery with: :null_session, :only =>[:new], raise: false
 
   #-------------------------
 

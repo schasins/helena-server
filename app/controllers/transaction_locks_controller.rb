@@ -1,7 +1,7 @@
 class TransactionLocksController < ApplicationController
 
-  skip_before_action :protect_from_forgery, :only =>[:new, :exists, :new_with_dataset_slice] # save_relation is going to be coming from the Chrome extension, so can't get the CSRF token.  in future should consider whether we should require some kind of authentication for this
-  protect_from_forgery with: :null_session, :only =>[:new, :exists, :new_with_dataset_slice]
+  # new/exists/new_with_dataset_slice is going to be coming from the Chrome extension, so can't get the CSRF token.  in future should consider whether we should require some kind of authentication for this
+  protect_from_forgery with: :null_session, :only =>[:new, :exists, :new_with_dataset_slice], raise: false
 
   def new
     transaction = TransactionLock.transaction_saving_internals(params)

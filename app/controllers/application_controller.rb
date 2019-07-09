@@ -1,5 +1,3 @@
 class ApplicationController < ActionController::Base
-  # Prevent CSRF attacks by raising an exception.
-  # For APIs, you may want to use :null_session instead.
-  protect_from_forgery with: :exception
+  # protect_from_forgery included by default in Rails 5.2: https://github.com/rails/rails/pull/29742
 end
