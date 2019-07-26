@@ -32,8 +32,7 @@ class Relation < ActiveRecord::Base
 
           # ok, now we really don't think there's an existing relation in here, better make a new one
           new_relation = true
-          parameters = ActionController::Parameters.new(params) # see strong parameters for more details on this
-          parameters = parameters.permit(:name, :selector, :selector_version, :url, :num_rows_in_demonstration, :exclude_first, :next_type, :next_button_selector)
+          parameters = params.permit(:name, :selector, :selector_version, :url, :num_rows_in_demonstration, :exclude_first, :next_type, :next_button_selector)
           parameters[:url] = urlObj
           puts parameters
           relation = Relation.create(parameters)
@@ -44,8 +43,7 @@ class Relation < ActiveRecord::Base
     # ok, now we have the relation with which we should store the columns
     columns = params[:columns]
     columns.each{|i, column_params|
-      parameters = ActionController::Parameters.new(column_params) # see strong parameters for more details on this
-      parameters = parameters.permit(:name, :xpath, :suffix)
+      parameters = column_params.permit(:name, :xpath, :suffix)
       if new_relation or Column.where(xpath: column_params[:xpath], relation: relation).length == 0
         # either the relation is new so all columns must be added, or the pre-existing relationship doesn't yet have the col
         parameters[:relation] = relation
