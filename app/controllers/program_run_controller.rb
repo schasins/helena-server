@@ -118,15 +118,19 @@ class ProgramRunsController < ApplicationController
     prog = Program.find(params[:id])
     timeLimit = nil
     rowLimit = nil
+    detailed = false
     if (params[:hours])
       timeLimit = params[:hours]
     elsif (params[:rows])
       # for now you can have a time limit or a row limit, but not both; todo: do we want both?
       rowLimit = params[:rows]
     end
+    if (params[:detailed])
+      detailed = true
+    end
     filename = gen_filename_for_prog(prog)+".csv"
     respond_to do |format|
-      format.csv {render_csv_helper(true, false, nil, prog, filename, timeLimit, rowLimit)}
+      format.csv {render_csv_helper(true, detailed, nil, prog, filename, timeLimit, rowLimit)}
     end
   end
 
