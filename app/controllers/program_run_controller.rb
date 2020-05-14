@@ -45,6 +45,10 @@ class ProgramRunsController < ApplicationController
     end
   end
 
+  def make_report(prog, timeLimit = nil)
+    ProgramRun.batch_based_report(prog, timeLimit = nil)
+  end
+
 #-------------------------
 
   def new
@@ -132,6 +136,20 @@ class ProgramRunsController < ApplicationController
     respond_to do |format|
       format.csv {render_csv_helper(true, detailed, nil, prog, filename, timeLimit, rowLimit)}
     end
+  end
+
+  def report
+    prog = Program.find(params[:id])
+    timeLimit = nil
+    rowLimit = nil
+    if (params[:hours])
+      timeLimit = params[:hours]
+    elsif (params[:rows])
+      # for now you can have a time limit or a row limit, but not both; todo: do we want both?
+      rowLimit = params[:rows]
+    end
+    reportdict = make_report(prog, timeLimit)
+    render json: reportdict
   end
 
   def render_csv_helper(allRuns, detailed, run, prog, filename, timeLimit = nil, rowLimit = nil)

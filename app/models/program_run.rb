@@ -9,6 +9,32 @@ class ProgramRun < ActiveRecord::Base
 
 #--------------------
 
+	def self.batch_based_report(program, timeLimitInHours)
+
+		uncached do
+
+			# first let's grab the ids for all the rows we're going to show, so that we can break them down into batches
+			# (in order that we can stream the results to the user, to break up large download tasks)
+			row_ids = DatasetRow.select(:id)
+
+			# let's get the basics.  what kind of row do we want in the first place?  all runs?  one run?
+
+			row_ids = row_ids.where({program_id: program.id})
+			# need to also order by the prog run since we're collecting all the prog runs
+			row_ids = row_ids.order(program_run_id: :asc, program_sub_run_id: :asc, run_row_index: :asc)
+
+			if (timeLimitInHours)
+	            adjusted_datetime = (DateTime.now.to_time - (timeLimitInHours.to_i).hours).to_datetime
+				row_ids = row_ids.where('created_at > ?', adjusted_datetime)
+			end
+
+			count = row_ids.count
+
+			return {numrows: count}
+		end
+
+	end
+
 	def self.batch_based_construction(allRuns, detailedRows, run, program, timeLimitInHours, rowLimit, &block)
 
 		uncached do
