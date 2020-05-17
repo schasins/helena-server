@@ -46,7 +46,7 @@ class ProgramRunsController < ApplicationController
   end
 
   def make_report(prog, timeLimit = nil)
-    ProgramRun.batch_based_report(prog, timeLimit = nil)
+    ProgramRun.batch_based_report(prog, timeLimit)
   end
 
 #-------------------------

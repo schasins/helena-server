@@ -20,8 +20,6 @@ class ProgramRun < ActiveRecord::Base
 			# let's get the basics.  what kind of row do we want in the first place?  all runs?  one run?
 
 			row_ids = row_ids.where({program_id: program.id})
-			# need to also order by the prog run since we're collecting all the prog runs
-			row_ids = row_ids.order(program_run_id: :asc, program_sub_run_id: :asc, run_row_index: :asc)
 
 			if (timeLimitInHours)
 	            adjusted_datetime = (DateTime.now.to_time - (timeLimitInHours.to_i).hours).to_datetime
@@ -29,8 +27,14 @@ class ProgramRun < ActiveRecord::Base
 			end
 
 			count = row_ids.count
+			run_count = row_ids.distinct.count(:program_run_id)
+			run_details = DatasetRow.where(id: row_ids).group(:program_run_id).select(:program_run_id).select(
+				  "MIN(created_at) AS starttime",
+				  "MAX(created_at) AS endtime",
+				  'COUNT(id) AS numrows'
+				)
 
-			return {numrows: count}
+			return {numrows: count, numruns: run_count, rundetails: run_details}
 		end
 
 	end
