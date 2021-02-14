@@ -75,7 +75,7 @@ class ProgramRun < ActiveRecord::Base
 			end
 
 			# ok, now we have all the row ids.  now break them into batches, do the actual processing
-			batch_size = 500
+			batch_size = 100
 			row_ids.each_slice(batch_size) do |row_ids|
 
 				# let's retrieve all the information we actually need about the current batch of rows
