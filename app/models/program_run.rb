@@ -54,6 +54,12 @@ class ProgramRun < ActiveRecord::Base
 				row_ids = row_ids.where({program_run_id: run.id})
 			end
 
+
+			if (timeLimitInHours)
+	            adjusted_datetime = (DateTime.now.to_time - (timeLimitInHours.to_i).hours).to_datetime
+				row_ids = row_ids.where('created_at > ?', adjusted_datetime)
+			end
+
 			# and how should we order them?  if we're limiting to the most recent rows, we'll want to order by time added
 			# (to grab only the most recent x rows)
 			# otherwise, let's order them by run, then subrun (parallel worker), then row index
@@ -66,12 +72,6 @@ class ProgramRun < ActiveRecord::Base
 			else
 				# there's no limit and it's just one run, so...
 				row_ids = row_ids.order(program_sub_run_id: :asc, run_row_index: :asc)
-			end
-
-
-			if (timeLimitInHours)
-	            adjusted_datetime = (DateTime.now.to_time - (timeLimitInHours.to_i).hours).to_datetime
-				row_ids = row_ids.where('created_at > ?', adjusted_datetime)
 			end
 
 			# ok, now we have all the row ids.  now break them into batches, do the actual processing
