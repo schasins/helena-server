@@ -43,7 +43,7 @@ class ProgramRun < ActiveRecord::Base
 
 		uncached do
 
-			yield "header\n" # can we stop timeouts by starting with empty?
+			yield "" # can we stop timeouts by starting with empty?
 
 			# first let's grab the ids for all the rows we're going to show, so that we can break them down into batches
 			# (in order that we can stream the results to the user, to break up large download tasks)
@@ -83,7 +83,7 @@ class ProgramRun < ActiveRecord::Base
 
 				# let's retrieve all the information we actually need about the current batch of rows
 				rows = DatasetRow.where(id: row_ids)
-							.eager_load(:program_run, dataset_cells: [:dataset_value, :dataset_link])
+							.includes(:program_run, dataset_cells: [:dataset_value, :dataset_link])
 				if (rowLimit)
 					rows = rows.order(created_at: :desc) # remember this order must match the order above
 				elsif (allRuns)
@@ -100,7 +100,7 @@ class ProgramRun < ActiveRecord::Base
 					currentProgRunCounter = progRunObj.run_count
 
 					cells = row.dataset_cells.order(col: :asc)
-					
+
 					scraped_times = []
 					cells.each{ |cell|
 
