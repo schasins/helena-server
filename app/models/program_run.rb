@@ -83,7 +83,7 @@ class ProgramRun < ActiveRecord::Base
 
 				# let's retrieve all the information we actually need about the current batch of rows
 				rows = DatasetRow.where(id: row_ids)
-							.includes(:program_run, dataset_cells: [:dataset_value, :dataset_link])
+							.eager_load(:program_run, dataset_cells: [:dataset_value, :dataset_link])
 				if (rowLimit)
 					rows = rows.order(created_at: :desc) # remember this order must match the order above
 				elsif (allRuns)
@@ -100,6 +100,7 @@ class ProgramRun < ActiveRecord::Base
 					currentProgRunCounter = progRunObj.run_count
 
 					cells = row.dataset_cells.order(col: :asc)
+					
 					scraped_times = []
 					cells.each{ |cell|
 
