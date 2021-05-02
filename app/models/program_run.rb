@@ -41,6 +41,8 @@ class ProgramRun < ActiveRecord::Base
 
 	def self.batch_based_construction(allRuns, detailedRows, run, program, timeLimitInHours, rowLimit, &block)
 
+		yield "" # can we stop timeouts by starting with empty?
+
 		uncached do
 
 			# first let's grab the ids for all the rows we're going to show, so that we can break them down into batches
