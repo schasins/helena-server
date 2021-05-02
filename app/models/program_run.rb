@@ -43,7 +43,7 @@ class ProgramRun < ActiveRecord::Base
 
 		uncached do
 
-			yield "" # can we stop timeouts by starting with empty?
+			yield "header\n" # can we stop timeouts by starting with empty?
 
 			# first let's grab the ids for all the rows we're going to show, so that we can break them down into batches
 			# (in order that we can stream the results to the user, to break up large download tasks)
