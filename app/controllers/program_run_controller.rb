@@ -172,6 +172,7 @@ class ProgramRunsController < ApplicationController
     headers['X-Accel-Buffering'] = 'no'
     headers["Cache-Control"] ||= "no-cache"
     headers.delete("Content-Length")
+    headers['Last-Modified'] = Time.now.ctime.to_s
   end
 
   def csv_lines(allRuns, detailed, run, prog, timeLimit = nil, rowLimit = nil)
