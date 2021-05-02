@@ -41,9 +41,9 @@ class ProgramRun < ActiveRecord::Base
 
 	def self.batch_based_construction(allRuns, detailedRows, run, program, timeLimitInHours, rowLimit, &block)
 
-		yield "" # can we stop timeouts by starting with empty?
-
 		uncached do
+
+			yield "" # can we stop timeouts by starting with empty?
 
 			# first let's grab the ids for all the rows we're going to show, so that we can break them down into batches
 			# (in order that we can stream the results to the user, to break up large download tasks)
@@ -59,7 +59,8 @@ class ProgramRun < ActiveRecord::Base
 
 			if (timeLimitInHours)
 	            adjusted_datetime = (DateTime.now.to_time - (timeLimitInHours.to_i).hours).to_datetime
-				row_ids = row_ids.where('created_at > ?', adjusted_datetime)
+	            cur_datetime = (DateTime.now.to_time).to_datetime
+				row_ids = row_ids.where('created_at > ?', adjusted_datetime).where('created_at < ?', cur_datetime)
 			end
 
 			# and how should we order them?  if we're limiting to the most recent rows, we'll want to order by time added
